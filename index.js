@@ -90,7 +90,6 @@ app.post("/webflow-webhook", async (req, res) => {
       }
     }`;
 
-  console.log("🔗 Sending Query to Monday.com:", query);
 
   try {
     const response = await axios.post(
