@@ -22,17 +22,29 @@ if (!MONDAY_API_KEY || !BOARD_ID || !GROUP_ID) {
 
 const mapWebflowFields = (formName, formData, submittedAt) => {
   let mappedData = { date: new Date(submittedAt).toISOString().split("T")[0] };
-  console.log("form data",formData);
+  console.log("form data", formData);
   mappedData = {
     ...mappedData,
-    lead: formData["Name"] || formData["Full Name"] || "User",
+    lead:
+      formData["Name"] ||
+      formData["Full Name"] ||
+      (formData["First Name"] && formData["Last Name"]
+        ? `${formData["First Name"]} ${formData["Last Name"]}`
+        : "User"),
     company: formData["Company"] || "N/A",
-    email: formData["Email"] || "N/A",
-    phone: formData["Phone"] || formData["Phone 2"] || "N/A",
-    message: formData["Message"] || formData["Tell us what you are trying to build"] || "N/A",
+    email: formData["Email"] || formData["Contact Email"] || "N/A",
+    phone:
+      formData["Phone"] ||
+      formData["Phone 2"] ||
+      formData["Contact No"] ||
+      "N/A",
+    message:
+      formData["Message"] ||
+      formData["Tell us what you are trying to build"] ||
+      "N/A",
   };
-  
-  console.log("Mapped Data",mappedData);
+
+  console.log("Mapped Data", mappedData);
   return mappedData;
 };
 
@@ -41,7 +53,9 @@ app.post("/webflow-webhook", async (req, res) => {
 
   const { payload } = req.body;
   if (!payload) {
-    return res.status(400).json({ success: false, message: "Invalid payload structure" });
+    return res
+      .status(400)
+      .json({ success: false, message: "Invalid payload structure" });
   }
 
   const formName = payload.name || "Unknown Form";
@@ -57,9 +71,9 @@ app.post("/webflow-webhook", async (req, res) => {
     date4: mappedData.date,
     text_mknfkez9: mappedData.email,
     text_mknfphdb: mappedData.phone,
-    text_mknf6w0k : mappedData.company || "",
-    long_text_mkng2j3v : mappedData.message,
-    status: { label: "New" }
+    text_mknf6w0k: mappedData.company || "",
+    long_text_mkng2j3v: mappedData.message,
+    status: { label: "New" },
   };
 
   const query = `
@@ -74,7 +88,6 @@ app.post("/webflow-webhook", async (req, res) => {
       }
     }`;
 
-
   try {
     const response = await axios.post(
       "https://api.monday.com/v2",
@@ -88,11 +101,26 @@ app.post("/webflow-webhook", async (req, res) => {
     );
 
     console.log("✅ Data saved to Monday.com:", response.data);
-    res.status(200).json({ success: true, message: `Received and saved form: ${formName}` });
+    res
+      .status(200)
+      .json({ success: true, message: `Received and saved form: ${formName}` });
   } catch (error) {
-    console.error("❌ Error saving to Monday.com:", error.response?.data || error.message);
-    res.status(500).json({ success: false, message: "Error saving to Monday.com", error: error.response?.data || error.message });
+    console.error(
+      "❌ Error saving to Monday.com:",
+      error.response?.data || error.message
+    );
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error saving to Monday.com",
+        error: error.response?.data || error.message,
+      });
   }
 });
 
-app.listen(PORT, () => console.log(`🚀 Webhook listening on http://localhost:${PORT}/webflow-webhook`));
+app.listen(PORT, () =>
+  console.log(
+    `🚀 Webhook listening on http://localhost:${PORT}/webflow-webhook`
+  )
+);
