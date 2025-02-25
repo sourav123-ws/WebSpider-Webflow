@@ -23,29 +23,15 @@ if (!MONDAY_API_KEY || !BOARD_ID || !GROUP_ID) {
 const mapWebflowFields = (formName, formData, submittedAt) => {
   let mappedData = { date: new Date(submittedAt).toISOString().split("T")[0] };
   console.log("form data",formData);
-  switch (formName) {
-    case "Request Your Proposal":
-      mappedData = {
-        ...mappedData,
-        lead: `${formData["First Name"] || ""} ${formData["Last Name"] || ""}`.trim(),
-        email: formData["Contact Email"] || "",
-        phone: formData["Contact No"] || "",
-        company : formData["Company"] || "",
-        message: formData["Message"] || "",
-        source: formData["Page Title"] || "",
-        url: formData["URL"] || "",
-      };
-      break;
-    default:
-      mappedData = {
-        ...mappedData,
-        lead: formData["Name"] || "User",
-        company : formData["Company"] || "",
-        email: formData["Email"] || "",
-        phone: formData["Phone"] || formData["Phone 2"] || "",
-      };
-      break;
-  }
+  mappedData = {
+    ...mappedData,
+    lead: formData["Name"] || formData["Full Name"] || "User",
+    company: formData["Company"] || "N/A",
+    email: formData["Email"] || "N/A",
+    phone: formData["Phone"] || formData["Phone 2"] || "N/A",
+    message: formData["Message"] || formData["Tell us what you are trying to build"] || "N/A",
+  };
+  
   console.log("Mapped Data",mappedData);
   return mappedData;
 };
@@ -72,9 +58,7 @@ app.post("/webflow-webhook", async (req, res) => {
     text_mknfkez9: mappedData.email,
     text_mknfphdb: mappedData.phone,
     text_mknf6w0k : mappedData.company || "",
-    text_mknf7msg: mappedData.message || "",
-    text_mknfzxvr: mappedData.source || "",
-    text_mknfndc3: mappedData.url || "",
+    long_text_mkng2j3v : mappedData.message,
     status: { label: "New" }
   };
 
