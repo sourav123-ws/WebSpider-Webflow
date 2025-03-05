@@ -75,7 +75,7 @@ app.post("/webflow-webhook", async (req, res) => {
     text_mknfphdb: mappedData.phone,
     text_mknf6w0k: mappedData.company || "",
     long_text_mkng2j3v: mappedData.message,
-    source: mappedData.source,
+    text_mknh2vcq: mappedData.source,
     long_text_mknqqja7 : mappedData.referral_url,
     status: { label: "New" },
   };
