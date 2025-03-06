@@ -231,8 +231,8 @@ async function getMondayColumnValue(boardId, pulseId, columnId) {
 function formatDate(dateString) {
   console.log("📌 Raw date string:", dateString);
 
-  // Try parsing the received format "3/5/2025 6:39:46 PM"
-  let parsedDate = moment.tz(dateString, "M/D/YYYY h:mm:ss A", "UTC"); // Assuming UTC
+  // Parse as an ISO 8601 date string (which Monday.com sends)
+  let parsedDate = moment.utc(dateString);
 
   if (!parsedDate.isValid()) {
       console.error("❌ Invalid date format:", dateString);
@@ -246,7 +246,6 @@ function formatDate(dateString) {
 
   return istDate;
 }
-
 
 
 
