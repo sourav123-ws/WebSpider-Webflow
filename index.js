@@ -229,23 +229,25 @@ async function getMondayColumnValue(boardId, pulseId, columnId) {
 
 
 function formatDate(dateString) {
-  if (!dateString) return null;
+  console.log("📌 Raw date string:", dateString);
 
-  console.log("📥 Received date for formatting:", dateString);
+  // Try parsing the received format "3/5/2025 6:39:46 PM"
+  let parsedDate = moment.tz(dateString, "M/D/YYYY h:mm:ss A", "UTC"); // Assuming UTC
 
-  // Convert to UTC using moment
-  let parsedDate = moment.utc(dateString, moment.ISO_8601, true);
   if (!parsedDate.isValid()) {
-    console.error("❌ Invalid date format received:", dateString);
-    return null;
+      console.error("❌ Invalid date format:", dateString);
+      return null;
   }
 
-  // Convert UTC to IST (Asia/Kolkata)
-  const formattedDate = parsedDate.tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
-  
-  console.log("✅ Final Formatted Date (IST):", formattedDate);
-  return formattedDate;
+  // Convert to IST (Indian Standard Time)
+  let istDate = parsedDate.tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
+
+  console.log("🕰️ Converted to IST:", istDate);
+
+  return istDate;
 }
+
+
 
 
 
