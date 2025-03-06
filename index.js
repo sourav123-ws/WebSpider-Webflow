@@ -233,17 +233,17 @@ function formatDate(dateString) {
 
   console.log("📥 Received date for formatting:", dateString);
 
-  const cleanedDateString = dateString.replace(/\+\d{2}(:\d{2}|\.\d{2})?$/, "");
-  console.log("🔄 Cleaned Date String:", cleanedDateString);
-
-  let parsedDate = moment.utc(cleanedDateString, moment.ISO_8601, true);
+  // Convert to UTC using moment
+  let parsedDate = moment.utc(dateString, moment.ISO_8601, true);
   if (!parsedDate.isValid()) {
-      console.error("❌ Invalid date format received:", dateString);
-      return null;
+    console.error("❌ Invalid date format received:", dateString);
+    return null;
   }
 
-  const formattedDate = parsedDate.format("YYYY-MM-DD");
-  console.log("✅ Final Formatted Date (UTC):", formattedDate);
+  // Convert UTC to IST (Asia/Kolkata)
+  const formattedDate = parsedDate.tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss");
+  
+  console.log("✅ Final Formatted Date (IST):", formattedDate);
   return formattedDate;
 }
 
