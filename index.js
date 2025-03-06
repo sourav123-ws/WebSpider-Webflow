@@ -231,8 +231,8 @@ async function getMondayColumnValue(boardId, pulseId, columnId) {
 function formatDate(dateString) {
   console.log("📌 Raw date string:", dateString);
 
-  // Parse as an ISO 8601 date string (which Monday.com sends)
-  let parsedDate = moment.utc(dateString);
+  // Handle different input formats
+  let parsedDate = moment.utc(dateString, moment.ISO_8601, true);
 
   if (!parsedDate.isValid()) {
       console.error("❌ Invalid date format:", dateString);
