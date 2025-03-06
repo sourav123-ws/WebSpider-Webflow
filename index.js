@@ -6,11 +6,10 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(cors());
-app.use(express.json());
 
 const MONDAY_API_KEY = process.env.MONDAY_API_KEY;
 const BOARD_ID = process.env.BOARD_ID;
@@ -297,8 +296,6 @@ async function updateMondayDate(boardId, pulseId, formattedDate) {
   }
 }
 
-app.listen(PORT, () =>
-  console.log(
-    `🚀 Webhook listening on http://localhost:${PORT}/webflow-webhook`
-  )
-);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Webhook listening on port ${PORT}`);
+});
