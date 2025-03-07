@@ -25,8 +25,7 @@ const TEXT_DATE_COLUMN_ID = "date_mkn218r2";
 const STATUS_COLUMN_ID = "status";
 const LEAD_SCORE_COLUMN_ID = "numeric_mknst4ys";
 
-
-const DEALS_COLUMN_ID = "numeric_mknseckr" ;
+const DEALS_COLUMN_ID = "numeric_mknseckr";
 
 const LEAD_SCORE_MAPPING = {
   "New / Unqualified": 10,
@@ -48,6 +47,82 @@ const DEAL_LEAD_SCORE_MAPPING = {
 if (!MONDAY_API_KEY || !BOARD_ID || !GROUP_ID) {
   console.error("❌ Missing environment variables!");
   process.exit(1);
+}
+
+async function updateMondayLeadStage(boardId, pulseId, stage) {
+  try {
+    const query = `
+      mutation {
+        change_column_value(
+          board_id: ${boardId}, 
+          item_id: ${pulseId}, 
+          column_id: "color_mkntbxq3", 
+          value: "{\\"label\\":\\"${stage}\\"}"
+        ) {
+          id
+        }
+      }`;
+
+    const response = await fetch("https://api.monday.com/v2", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: MONDAY_API_KEY,
+      },
+      body: JSON.stringify({ query }),
+    });
+
+    const data = await response.json();
+
+    if (data.errors) {
+      console.error("❌ Error updating stage in Monday.com:", data.errors);
+      return false;
+    }
+
+    console.log("✅ Lead stage updated successfully:", stage);
+    return true;
+  } catch (error) {
+    console.error("❌ Exception in updating stage:", error);
+    return false;
+  }
+}
+
+async function updateMondayDealStage(boardId, pulseId, stage) {
+  try {
+    const query = `
+      mutation {
+        change_column_value(
+          board_id: ${boardId}, 
+          item_id: ${pulseId}, 
+          column_id: "color_mknt1t1j", 
+          value: "{\\"label\\":\\"${stage}\\"}"
+        ) {
+          id
+        }
+      }`;
+
+    const response = await fetch("https://api.monday.com/v2", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: MONDAY_API_KEY,
+      },
+      body: JSON.stringify({ query }),
+    });
+
+    const data = await response.json();
+
+    if (data.errors) {
+      console.error("❌ Error updating stage in Monday.com:", data.errors);
+      return false;
+    }
+
+    console.log("✅ Lead stage updated successfully:", stage);
+    return true;
+  } catch (error) {
+    console.error("❌ Exception in updating stage:", error);
+    return false;
+  }
 }
 
 const mapWebflowFields = (formName, formData, submittedAt) => {
@@ -156,7 +231,6 @@ app.post("/webflow-webhook", async (req, res) => {
 //date-conversion
 app.post("/monday-webhook", async (req, res) => {
   try {
-
     console.log("🚀 Webhook received", JSON.stringify(req.body, null, 2));
 
     if (req.body.challenge) {
@@ -252,6 +326,20 @@ app.post("/monday-webhook", async (req, res) => {
         }
       }
 
+      let stage = "";
+      if (newLeadScore >= 0 && newLeadScore <= 19) {
+        stage = "Cold";
+      } else if (newLeadScore >= 20 && newLeadScore <= 49) {
+        stage = "Warm";
+      }
+
+      console.log(`🔥 Lead is now categorized as: ${stage}`);
+      const updateStageSuccess = await updateMondayLeadStage(
+        boardId,
+        pulseId,
+        stage
+      );
+
       const updateSuccess = await updateMondayLeadScore(
         boardId,
         pulseId,
@@ -263,51 +351,51 @@ app.post("/monday-webhook", async (req, res) => {
           : "Failed to update Lead Score",
         previousLeadScore,
         newLeadScore,
-        scoreChange: newLeadScore - (previousLeadScore ?? 0), // Return score difference
+        scoreChange: newLeadScore - (previousLeadScore ?? 0),
       });
     }
 
     if (
-      (type === "change_column_value" || type === "update_column_value") && columnId === "deal_stage") {
+      (type === "change_column_value" || type === "update_column_value") &&
+      columnId === "deal_stage"
+    ) {
       console.log("🚀 Triggered status update event!");
-
+    
       console.log(`📌 Event Type: ${type}`);
       console.log(`📋 Column ID: ${columnId} (Expected: ${STATUS_COLUMN_ID})`);
-
+    
       const newStatus = value.label?.text;
       const previousStatus = previousValue?.label?.text;
-
+    
       console.log("🆕 New Status:", newStatus);
       console.log("📜 Previous Status:", previousStatus);
-
+    
       if (!newStatus || !(newStatus in DEAL_LEAD_SCORE_MAPPING)) {
         console.log("❌ Invalid status value, skipping update:", newStatus);
         return res.status(400).json({ error: "Invalid status value" });
       }
-
+    
       console.log("✅ Valid status detected, processing update...");
-
+    
       const newLeadScore = DEAL_LEAD_SCORE_MAPPING[newStatus];
       const previousLeadScore = previousStatus
         ? DEAL_LEAD_SCORE_MAPPING[previousStatus]
         : null;
-
+    
       console.log("📊 Lead Score Mapping:", DEAL_LEAD_SCORE_MAPPING);
       console.log(`🎯 New Lead Score: ${newLeadScore}`);
       console.log(`📉 Previous Lead Score: ${previousLeadScore}`);
-
+    
       if (previousLeadScore === null) {
-        console.log(
-          "⚠️ No previous lead score found, setting new score directly."
-        );
+        console.log("⚠️ No previous lead score found, setting new score directly.");
       } else {
         console.log(
           `🔄 Status changed from "${previousStatus}" to "${newStatus}", Lead Score from ${previousLeadScore} to ${newLeadScore}`
         );
-
+    
         const scoreChange = newLeadScore - previousLeadScore;
         console.log(`📊 Score Change: ${scoreChange}`);
-
+    
         if (scoreChange < 0) {
           console.log(`📉 Lead Score decreased by ${Math.abs(scoreChange)}`);
         } else if (scoreChange > 0) {
@@ -316,36 +404,67 @@ app.post("/monday-webhook", async (req, res) => {
           console.log("🔄 No change in lead score.");
         }
       }
-
+    
       console.log(
         `📋 Updating Lead Score for Pulse ID: ${pulseId}, Board ID: ${DEMO_BOARD_ID}`
       );
-
+    
       try {
         const updateSuccess = await updateMondayDealScore(
           DEMO_BOARD_ID,
           pulseId,
           newLeadScore
         );
-
-        console.log(
-          `✅ Update Status: ${updateSuccess ? "Success" : "Failed"}`
+    
+        console.log(`✅ Lead Score Update Status: ${updateSuccess ? "Success" : "Failed"}`);
+    
+        if (!updateSuccess) {
+          return res.status(500).json({
+            message: "Failed to update Lead Score",
+            previousLeadScore,
+            newLeadScore,
+            scoreChange: newLeadScore - (previousLeadScore ?? 0),
+          });
+        }
+    
+        // ✅ Now update the stage after lead score is successfully updated
+        let stage = "";
+        if (newLeadScore < 50) {
+          stage = "Cold"; 
+        } else if (newLeadScore >= 50 && newLeadScore <= 79) {
+          stage = "Warm";
+        } else if (newLeadScore >= 80) {
+          stage = "Hot";
+        }
+    
+        console.log(`🔥 Lead is now categorized as: ${stage}`);
+    
+        const updateStageSuccess = await updateMondayDealStage(
+          DEMO_BOARD_ID,
+          pulseId,
+          stage
         );
-
-        return res.status(updateSuccess ? 200 : 500).json({
-          message: updateSuccess
-            ? "Lead Score updated successfully"
-            : "Failed to update Lead Score",
+    
+        if (!updateStageSuccess) {
+          console.error("❌ Failed to update stage in Monday.com");
+        } else {
+          console.log("✅ Stage updated successfully");
+        }
+    
+        return res.status(200).json({
+          message: "Lead Score and Stage updated successfully",
           previousLeadScore,
           newLeadScore,
           scoreChange: newLeadScore - (previousLeadScore ?? 0),
+          stage,
         });
+    
       } catch (error) {
         console.error("❌ Error updating Lead Score:", error);
         return res.status(500).json({ error: "Internal Server Error" });
       }
     }
-
+    
 
     return res.status(200).json({ message: "Ignoring unrelated event" });
   } catch (error) {
@@ -489,7 +608,10 @@ async function updateMondayDealScore(boardId, pulseId, dealScore) {
       }
     );
 
-    console.log("✅ Monday API Response:", JSON.stringify(response.data, null, 2));
+    console.log(
+      "✅ Monday API Response:",
+      JSON.stringify(response.data, null, 2)
+    );
 
     if (response.data.errors) {
       console.error("❌ Monday API Error:", response.data.errors);
@@ -506,7 +628,6 @@ async function updateMondayDealScore(boardId, pulseId, dealScore) {
     return false;
   }
 }
-
 
 async function updateMondayDate(boardId, pulseId, formattedDate) {
   try {
@@ -565,5 +686,3 @@ async function updateMondayDate(boardId, pulseId, formattedDate) {
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Webhook listening on port ${PORT}`);
 });
-
-
