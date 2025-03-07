@@ -577,14 +577,26 @@ app.post("/monday-webhook", async (req, res) => {
       console.log(`📌 Event Type: ${type}`);
       console.log(`📋 Column ID: ${columnId} (Expected: ${STATUS_COLUMN_ID})`);
 
-      const newStatus = value.label?.text;
+      if (!value.label?.text) {
+        console.log("⚠️ Empty status received, skipping update.");
+        return res.status(200).json({ message: "No valid status change detected." });
+      }
+
+      const newStatus = value.label?.text.trim().replace(/\s+/g, " ");
+
+      console.log("🆕 Normalized New Status:", newStatus);
       const previousStatus = previousValue?.label?.text;
 
       console.log("🆕 New Status:", newStatus);
       console.log("📜 Previous Status:", previousStatus);
 
-      if (!newStatus || !(newStatus in DEAL_LEAD_SCORE_MAPPING)) {
-        console.log("❌ Invalid status value, skipping update:", newStatus);
+      console.log("🔹 Full Webhook Payload:", JSON.stringify(req.body, null, 2));
+      console.log("🔹 Checking value.label:", value?.label);
+      console.log("🔹 Checking previousValue.label:", previousValue?.label);
+
+
+      if (!newStatus || !DEAL_LEAD_SCORE_MAPPING.hasOwnProperty(newStatus)) {
+        console.log("❌ Invalid or missing status value, skipping update. Received:", newStatus);
         return res.status(400).json({ error: "Invalid status value" });
       }
 
