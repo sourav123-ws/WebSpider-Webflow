@@ -2,6 +2,7 @@ import nodemailer from "nodemailer";
 
 
 export const sendMail=async(toEmail, body, subject, ccEmail = '')=>{
+    console.log("BODY",body);
     let transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -15,7 +16,9 @@ export const sendMail=async(toEmail, body, subject, ccEmail = '')=>{
         to: toEmail,
         cc: ccEmail || undefined,
         subject: subject,
-        text: body
+        html: `<div style="overflow-x: auto; white-space: nowrap;">
+              <pre>${body}</pre>
+           </div>`
     };
 
     try {

@@ -1,0 +1,57 @@
+Breakdown by Lead Source  
+Source         | # of Leads | Qualified Leads   | % of Total Leads  
+---------------|------------|-------------------|-------------------  
+${crmData.leadSources.map(source => 
+  `${formatCell(source.name, 15)} | ${formatCell(source.count, 10)} | ${formatCell(source.qualified, 15)} | ${formatCell(source.percentage + "%", 10)}`
+).join('\n')}
+
+Breakdown by Campaign  
+Campaign Name | # of Leads | Qualified Leads   | Conversion Rate  
+--------------|------------|-------------------|-------------------  
+${crmData.campaigns.map(campaign => 
+  `${formatCell(campaign.name, 15)} | ${formatCell(campaign.count, 10)} | ${formatCell(campaign.qualified, 15)} | ${formatCell(campaign.conversion + "%", 10)}`
+).join('\n')}
+
+Breakdown by Country  
+Country         | # of Leads | Qualified Leads   | % of Total Leads  
+----------------|------------|-------------------|-------------------  
+${crmData.countries.map(country => 
+  `${formatCell(country.name, 15)} | ${formatCell(country.count, 10)} | ${formatCell(country.qualified, 15)} | ${formatCell(country.percentage + "%", 10)}`
+).join('\n')}
+
+AI Analysis & Insights  
+Our AI-powered analysis of the CRM data has provided the following insights:
+
+Lead Name   | AI Score  | Predicted Closure Probability | Key Observations  
+------------|-----------|-------------------------------|----------------------------------  
+${crmData.aiInsights.map(insight => 
+  `${formatCell(insight.name, 20)} | ${formatCell(insight.score, 10)} | ${formatCell(insight.probability + "%", 15)} | ${insight.observations}`
+).join('\n')}
+
+Additional AI Observations:  
+- A significant proportion of leads from ${crmData.topSource} are showing higher engagement levels.  
+- Campaigns with targeted messaging are outperforming broader outreach initiatives.
+
+Predictive Insights:  
+- Leads with an AI Score above ${crmData.aiThreshold} have a significantly higher likelihood of closure.  
+- Lower-scoring leads might benefit from additional engagement before a final decision.
+
+Recommended Actions  
+Based on both traditional metrics and AI analysis, we recommend the following actions:
+
+For High-Probability Leads (e.g., Lead A):  
+- Expedite the final negotiation steps.  
+- Schedule a closing call or demo as soon as possible.
+
+For Moderate-Probability Leads (e.g., Lead B):  
+- Increase personalized follow-ups and engagement.  
+- Re-assess after an additional round of qualification.
+
+General Actions:  
+- Revisit underperforming segments (by source or campaign) and adjust strategies.  
+- Consider reallocating resources to campaigns showing higher conversion rates.  
+- Monitor leads with declining engagement closely and intervene with targeted outreach.
+
+Summary  
+Based on the overall metrics, detailed lead breakdowns, AI insights, and recommended actions, the following leads are prioritized for immediate closure:  
+${crmData.priorityLeads.join(', ')}
