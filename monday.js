@@ -112,7 +112,7 @@ export const main = async () => {
 
   const emailBody = aiResponseText.replace(/^Subject:.*?\n\n/, "").trim();
   console.log("Email Body:", emailBody);
-  sendMail("dipesh.majumder@webspiders.com", emailBody, subject, "sourav.bhattacherjee@webspiders.com")
+//   sendMail("utsab.ghosh@webspiders.com", emailBody, subject, "sourav.bhattacherjee@webspiders.com")
 
   // console.log("Generated Prompt:", prompt);
 };
