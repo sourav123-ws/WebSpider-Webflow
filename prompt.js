@@ -1,6 +1,6 @@
 import { fetchCRMData } from "./monday.js";
 
-const getCurrentDate = () => {
+export const getCurrentDate = () => {
   const now = new Date();
   return now.toLocaleDateString("en-GB", {
     day: "numeric",

@@ -31,10 +31,8 @@ app.post("/monday-webhook",mondayWebhooks);
 app.post("/manage-score-value",managerScoreValue);
 
 
-// setInterval(() => {
-//   console.log("⏳ Running main() at:", new Date().toLocaleTimeString());
-//   main();
-// }, 60 * 1000)
+main();
+
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Webhook listening on port ${PORT}`);

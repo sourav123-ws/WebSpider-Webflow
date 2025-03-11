@@ -1,6 +1,6 @@
 import fs from "fs";
 import nodemailer from "nodemailer";
-import { generatePrompt } from "./prompt.js";
+import { generatePrompt, getCurrentDate } from "./prompt.js";
 import { completions } from "./openai.js";
 import { sendMail } from "./utils.js";
 import axios from "axios";
@@ -9,6 +9,7 @@ dotenv.config();
 
 const MONDAY_API_KEY = process.env.MONDAY_API_KEY;
 const BOARD_ID = 1944965797;
+
 
 
 export const fetchCRMData = async () => {
@@ -105,12 +106,13 @@ export const main = async () => {
   const aiResponse = await completions(messages);
   const aiResponseText = String(aiResponse.data || aiResponse);
 
-  const subjectMatch = aiResponseText.match(/^Subject:\s*(.+)$/m);
-  const subject = subjectMatch ? subjectMatch[1] : "No Subject Found";
+//   const subjectMatch = aiResponseText.match(/^Subject:\s*(.+)$/m);
+  const todayDate = getCurrentDate();
+  const subject = `Daily Lead Summary – Report ${todayDate}`;
 
   const emailBody = aiResponseText.replace(/^Subject:.*?\n\n/, "").trim();
   console.log("Email Body:", emailBody);
-//   sendMail("utsab.ghosh@webspiders.com", emailBody, subject, "sourav.bhattacherjee@webspiders.com")
+  sendMail("dipesh.majumder@webspiders.com", emailBody, subject, "sourav.bhattacherjee@webspiders.com")
 
   // console.log("Generated Prompt:", prompt);
 };
