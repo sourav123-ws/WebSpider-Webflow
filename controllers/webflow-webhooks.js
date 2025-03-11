@@ -1,3 +1,8 @@
+
+import axios from "axios";
+import dotenv from "dotenv";
+dotenv.config();
+
 const MONDAY_API_KEY = process.env.MONDAY_API_KEY;
 
 const BOARD_ID = process.env.BOARD_ID;
