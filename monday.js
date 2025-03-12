@@ -10,94 +10,6 @@ dotenv.config();
 const MONDAY_API_KEY = process.env.MONDAY_API_KEY;
 const BOARD_ID = 1944965797;
 
-// export const fetchCRMData = async () => {
-//   let allItems = [];
-//   let cursor = null;
-//   let hasMore = true;
-
-//   try {
-//       while (hasMore) {
-//           const query = `
-//               query {
-//                   boards(ids: ${BOARD_ID}) {
-//                       id
-//                       name
-//                       items_page (limit: 100, cursor: ${cursor ? `"${cursor}"` : "null"}) {
-//                           cursor
-//                           items {
-//                               id
-//                               name
-//                               column_values {
-//                                   id
-//                                   text
-//                               }
-//                           }
-//                       }
-//                   }
-//               }
-//           `;
-
-//           const response = await axios.post(
-//               "https://api.monday.com/v2",
-//               { query },
-//               {
-//                   headers: {
-//                       Authorization: `Bearer ${MONDAY_API_KEY}`,
-//                       "Content-Type": "application/json",
-//                   },
-//               }
-//           );
-
-//           const items = response.data?.data?.boards?.[0]?.items_page?.items || [];
-//           allItems.push(...items);
-
-//           cursor = response.data?.data?.boards?.[0]?.items_page?.cursor;
-//           hasMore = !!cursor;
-//       }
-
-//       console.log(`✅ Fetched ${allItems.length} items from board ${BOARD_ID}`);
-
-//       const structuredData = {
-//           totalLeads: allItems.length,
-//           qualifiedLeads: allItems.filter(item => {
-//               return item.column_values.some(col => col.id === "qualified_id" && col.text === "Yes");
-//           }).length,
-//           leads: allItems.map(deal => ({
-//               name: deal.column_values.find(col => col.id === "client_name_mkmx5s30")?.text || 'N/A',
-//               company: deal.column_values.find(col => col.id === "text_mknx7fx9")?.text || 'N/A',
-//               stage: deal.column_values.find(col => col.id === "deal_stage")?.text || 'N/A',
-//               status: deal.column_values.find(col => col.id === "color_mknbte2j")?.text || 'N/A',
-//               dealSize: deal.column_values.find(col => col.id === "numeric_mknx4ka9")?.text || 'N/A',
-//               lastContact: deal.column_values.find(col => col.id === "date_mkna3qt1")?.text || 'N/A',
-//           })),
-//           leadSources: [],
-//           campaigns: [],
-//           countries: [],
-//           aiInsights: [],
-//           priorityLeads: allItems
-//               .filter(deal => deal.oppValue > 500000)
-//               .map(deal => deal.name)
-//       };
-
-//       return structuredData;
-//   } catch (error) {
-//       console.error(
-//           "❌ Error fetching CRM data:",
-//           JSON.stringify(error.response?.data || error.message, null, 2)
-//       );
-//       return {
-//           totalLeads: 0,
-//           qualifiedLeads: 0,
-//           leads: [],
-//           leadSources: [],
-//           campaigns: [],
-//           countries: [],
-//           aiInsights: [],
-//           priorityLeads: []
-//       };
-//   }
-// };
-
 export const fetchCRMData = async () => {
   let allItems = [];
   let cursor = null;
@@ -268,80 +180,20 @@ export const fetchCRMData = async () => {
   }
 };
 
+
 export const main = async () => {
   const prompt = await generatePrompt();
-  const subject = "Daily Lead Report"
+  const todayDate = getCurrentDate();
+  const subject = `Daily Lead Summary Report -  ${todayDate} (Top 15 Deals) - [Preview Mode]`
 
   console.log("Prompt",prompt);
 
-  // let messages = [
-  //   {
-  //     role: "system",
-  //     content:
-  //       "You are a high-level sales assistant generating a CRM daily summary email.",
-  //   },
-  //   { role: "user", content: prompt },
-  // ];
-
-  // messages = messages.slice(-10);
-
-  // const aiResponse = await completions(messages);
-  // const aiResponseText = String(aiResponse.data || aiResponse);
-
-  // const todayDate = getCurrentDate();
-  // const subject = `Daily Lead Summary – Report ${todayDate}`;
-
-  // const emailBody = aiResponseText.replace(/^Subject:.*?\n\n/, "").trim();
-  // console.log("Initial Email Body:", emailBody);
-
-//   // Now, call OpenAI again to format the emailBody into a proper HTML table format
-//   const tablePrompt = `
-//     Convert the following raw text data into a professionally formatted email with clear headings, structured tables, and a polished layout. Ensure readability and clarity while maintaining a formal business tone.
-// Email Structure:
-// Subject Line: Use a professional and concise subject that summarizes the report.
-// Greeting: Address the recipient properly.
-// Introduction: Provide a brief summary of the key insights from the data.
-// Lead Pipeline Overview: Present the total leads in a clear format.
-// Detailed Lead Information: Format the lead data into a clean, structured table.
-// Lead Source Breakdown: Display the breakdown in a well-aligned table.
-// Campaign Performance Table: Present campaign statistics in a readable format.
-// Conclusion & Next Steps: Provide key takeaways and any required actions.
-// Sign-off: End with a professional closing.
-// Raw Data for Formatting:
-
-// Summary:
-//     ${emailBody}
-
-// Formatting Guidelines:
-// Use bold for section headings.
-// Ensure tables have even column spacing and are aligned.
-// Round large numbers for readability if needed.
-// Use bullet points or highlights for key insights.
-    
-//   `;
-
-//   // Prepare the messages for the second API call
-//   let tableMessages = [
-//     {
-//       role: "system",
-//       content:
-//         "You are an assistant formatting CRM daily summaries into structured HTML tables.",
-//     },
-//     { role: "user", content: tablePrompt },
-//   ];
-
-//   // Get the formatted HTML table from OpenAI
-//   const aiTableResponse = await completions(tableMessages);
-//   const aiTableResponseText = String(aiTableResponse.data || aiTableResponse);
-
-  // console.log("AI Table Response",aiTableResponse);
-
-  // sendMail(
-  //   "utsab.ghosh@webspiders.com",
-  //   prompt,
-  //   subject,
-  //   "sourav.bhattacherjee@webspiders.com"
-  // );
+  sendMail(
+    "dipesh.majumder@webspiders.com",
+    prompt,
+    subject,
+    "sourav.bhattacherjee@webspiders.com"
+  );
 
   // console.log("Formatted HTML Email Body:", aiTableResponseText);
 };

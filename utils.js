@@ -16,7 +16,7 @@ export const sendMail=async(toEmail, body, subject, ccEmail = '')=>{
         to: toEmail,
         cc: ccEmail || undefined,
         subject: subject,
-        html: `<pre>${body}</pre>`
+        html: body
     };
 
     try {
