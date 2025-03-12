@@ -8,7 +8,8 @@ export const completions=async(messages, format = null)=>{
         const aiRequest = {
             model: 'gpt-3.5-turbo',
             messages: messages,
-            max_tokens: 500
+            max_tokens: 2000,
+            temperature: 0.7,
         };
 
         const openaiApiKey = process.env.OPEN_API_KEY;
@@ -36,6 +37,7 @@ export const completions=async(messages, format = null)=>{
                 ret_val.data = textResponse
             }
             ret_val.status=0
+
         }
     } catch (error) {
         console.error('Error in openai/completion:', error);

@@ -1,177 +1,6 @@
 import { fetchCRMData } from "./monday.js";
 import yaml from "js-yaml";
 
-// export const getCurrentDate = () => {
-//   const now = new Date();
-//   return now.toLocaleDateString("en-GB", {
-//     day: "numeric",
-//     month: "long",
-//     year: "numeric",
-//   });
-// };
-
-// export const generatePrompt = async () => {
-//   const crmData = await fetchCRMData();
-//   const todayDate = getCurrentDate();
-//   //   console.log(JSON.stringify(crmData, null, 2));
-//   console.log("Length", crmData.length);
-
-//   const opportunityValues = crmData.map((deal) => {
-//     const oppValueField = deal.column_values.find(
-//       (col) => col.id === "numeric_mknx4ka9"
-//     );
-//     return oppValueField ? oppValueField.text : null;
-//   });
-
-//   const promptExample = `Act as a high-level sales insights assistant. Using the provided CRM data and metrics, generate a detailed Daily Lead Summary email designed for executive decision-making.
-
-// **Subject:** "Daily Lead Summary – Report ${todayDate}"
-
-// **Instructions:**
-// The email should include the following sections and placeholders:
-
-// HTML Table
-// **Overall Pipeline Metrics Section:**
-// A table that lists metrics such as:
-// - Total Leads in Pipeline: [Total Count]
-// - Qualified Leads: [Qualified Count]
-
-// HTML Table
-// **Detailed Lead Information Section:**
-// A table with columns:
-// Lead Name | Company | Stage | Lead Score | Deal Value | Last Contact | Next Steps | Comments
-
-// HTML Table
-// **Breakdown by Lead Source Section:**
-// A table with columns:
-// Source | # of Leads | Qualified Leads | % of Total Leads
-
-// ---
-
-// ${JSON.stringify(crmData, null, 2)}
-// `;
-
-//   return promptExample;
-// };
-
-// import { fetchCRMData } from "./monday.js";
-// import yaml from "js-yaml"; // Ensure you install this: npm install js-yaml
-
-// export const getCurrentDate = () => {
-//   const now = new Date();
-//   return now.toLocaleDateString("en-GB", {
-//     day: "numeric",
-//     month: "long",
-//     year: "numeric",
-//   });
-// };
-
-// export const generatePrompt = async () => {
-//   const crmData = await fetchCRMData();
-//   const todayDate = getCurrentDate();
-
-//   console.log("Length", crmData.length);
-
-//   // Convert crmData to YAML format
-//   const crmDataYaml = yaml.dump(crmData, { indent: 2 });
-//   console.log("CRM Data in YAML format:\n", crmDataYaml);
-
-//   const promptExample = `
-// Subject: Daily Lead Summary – Report ${todayDate}
-
-// Hello [Executive Name],
-
-// Below is your CRM daily lead summary report to support decision-making on closing leads.
-
-// Overall Pipeline Metrics
-// Metric                         | Value
-// -------------------------------|----------------
-// Total Leads in Pipeline        | [Total Count]
-// Qualified Leads                | [Qualified Count]
-
-// Detailed Lead Information
-// Lead Name   | Company      | Stage           | Lead Score | Deal Size   | Last Contact  | Next Steps                         | Comments
-// ------------|--------------|-----------------|------------|-------------|---------------|------------------------------------|-----------------------------------------
-// Lead A      | [Company A]  | Proposal Sent   | [Score]    | [$ Amount]  | [MM/DD/YYYY]  | Follow-up scheduled [Date]         | High engagement; positive client feedback
-// Lead B      | [Company B]  | Needs Analysis  | [Score]    | [$ Amount]  | [MM/DD/YYYY]  | Further qualification needed       | Moderate interest; potential for growth
-
-// (Add additional rows as needed)
-
-// Breakdown by Lead Source
-// Source         | # of Leads | Qualified Leads   | % of Total Leads
-// ---------------|------------|-------------------|-------------------
-// Website        | [Count]    | [Qualified Count] | [Percentage]%
-// Social Media   | [Count]    | [Qualified Count] | [Percentage]%
-// Referral       | [Count]    | [Qualified Count] | [Percentage]%
-// Email Campaigns| [Count]    | [Qualified Count] | [Percentage]%
-// Other          | [Count]    | [Qualified Count] | [Percentage]%
-
-// Breakdown by Campaign
-// Campaign Name | # of Leads | Qualified Leads   | Conversion Rate
-// --------------|------------|-------------------|-------------------
-// Campaign A    | [Count]    | [Qualified Count] | [Conversion %]
-// Campaign B    | [Count]    | [Qualified Count] | [Conversion %]
-// Campaign C    | [Count]    | [Qualified Count] | [Conversion %]
-
-// Breakdown by Country
-// Country         | # of Leads | Qualified Leads   | % of Total Leads
-// ----------------|------------|-------------------|-------------------
-// United States   | [Count]    | [Qualified Count] | [Percentage]%
-// United Kingdom  | [Count]    | [Qualified Count] | [Percentage]%
-// Germany         | [Count]    | [Qualified Count] | [Percentage]%
-// India           | [Count]    | [Qualified Count] | [Percentage]%
-// Other           | [Count]    | [Qualified Count] | [Percentage]%
-
-// AI Analysis & Insights
-// Our AI-powered analysis of the CRM data has provided the following insights:
-
-// Lead Name   | AI Score  | Predicted Closure Probability | Key Observations
-// ------------|-----------|-------------------------------|----------------------------------
-// Lead A      | [Score]   | [Probability %]               | High engagement; quick follow-up responses
-// Lead B      | [Score]   | [Probability %]               | Moderate engagement; needs more nurturing
-
-// Additional AI Observations:
-// Overall Trends:
-// - A significant proportion of leads from [Top Source] are showing higher engagement levels.
-// - Campaigns with targeted messaging are outperforming broader outreach initiatives.
-
-// Predictive Insights:
-// - Leads with an AI Score above [Threshold] have a significantly higher likelihood of closure.
-// - Lower-scoring leads might benefit from additional engagement before a final decision.
-
-// Recommended Actions
-// Based on both traditional metrics and AI analysis, we recommend the following actions:
-
-// For High-Probability Leads (e.g., Lead A):
-// - Expedite the final negotiation steps.
-// - Schedule a closing call or demo as soon as possible.
-
-// For Moderate-Probability Leads (e.g., Lead B):
-// - Increase personalized follow-ups and engagement.
-// - Re-assess after an additional round of qualification.
-
-// General Actions:
-// - Revisit underperforming segments (by source or campaign) and adjust strategies.
-// - Consider reallocating resources to campaigns showing higher conversion rates.
-// - Monitor leads with declining engagement closely and intervene with targeted outreach.
-
-// Summary
-// Based on the overall metrics, detailed lead breakdowns, AI insights, and recommended actions, the following leads are prioritized for immediate closure:
-// [List of leads recommended for closure]
-
-// Thank you,
-// SpiderX Sales AI
-
-// CRM Data for Reference:
-
-// \`\`\`yaml
-// ${crmDataYaml}
-// \`\`\`
-// `;
-
-//   return promptExample;
-// };
-
 export const getCurrentDate = () => {
   const now = new Date();
   return now.toLocaleDateString("en-GB", {
@@ -181,24 +10,402 @@ export const getCurrentDate = () => {
   });
 };
 
-// Helper function to format text and ensure proper spacing
-const formatCell = (text, width, isCompany = false) => {
-  if (!text) return "N/A".padEnd(width, " ");
+// const formatCell = (text, width, isCompany = false) => {
+//   if (!text) return "N/A".padEnd(width, " ");
+//   text = String(text).normalize("NFC").trim();
 
-  // Normalize to prevent encoding issues
-  text = text.normalize("NFC").trim();
+//   // Trim only if it's a company name
+//   if (isCompany && text.length > 20) {
+//     return text.slice(0, 20) + "...";
+//   }
 
-  console.log(`Formatting: ${text} | IsCompany: ${isCompany} | Length: ${text.length}`);
+//   return text.padEnd(width, " ");
+// };
 
-  // Trim only if it's a company name
-  if (isCompany && text.length > 20) {
-    return text.slice(0, 20) + "...";
-  }
+// export const generatePrompt = async () => {
+//   const crmData = await fetchCRMData();
+//   const todayDate = getCurrentDate();
+//   let crmDataYaml = yaml.dump(crmData);
 
-  // Ensure consistent padding
-  return text.padEnd(width, " ");
-};
+//   // console.log(crmDataYaml);
 
+//   const widths = {
+//     name: 20,
+//     company: 20,
+//     stage: 15,
+//     score: 10,
+//     status: 10,
+//     dealSize: 12,
+//     lastContact: 12,
+//     campaign: 25,
+//     leadsGenerated: 18,
+//     conversionRate: 18,
+//     revenueImpact: 18,
+//     source: 20,
+//     totalLeads: 15,
+//     qualifiedLeads: 18,
+//     winRate: 12,
+//   };
+
+//   // Count leads by source
+//   //  const sourceCounts = {};
+//   //  crmData.leads.forEach((lead) => {
+//   //    const source = lead.sourceOfOpportunity || "Unknown";
+//   //    if (!sourceCounts[source]) {
+//   //      sourceCounts[source] = { total: 0, qualified: 0 };
+//   //    }
+//   //    sourceCounts[source].total++;
+//   //    if (lead.status === "Qualified") {
+//   //      sourceCounts[source].qualified++;
+//   //    }
+//   //  });
+
+
+//   const countryCounts = {};
+//   crmData.leads.forEach((lead) => {
+//     const country = lead.country || "Unknown";
+//     const oppValue = parseFloat(lead.oppValue) || 0;
+
+//     if (!countryCounts[country]) {
+//       countryCounts[country] = { total: 0, totalValuation: 0 };
+//     }
+
+//     countryCounts[country].total++;
+//     countryCounts[country].totalValuation += oppValue;
+//   });
+
+//   const countryTable = Object.entries(countryCounts)
+//     .map(([country, { total, totalValuation }]) => {
+//       const formattedValuation = totalValuation ? `$${totalValuation.toLocaleString()}` : "N/A";
+//       return `| ${formatCell(country, widths.country)} | ${formatCell(total, widths.countryLeads)} | ${formatCell(formattedValuation, widths.totalValuation)} |`;
+//     })
+//     .join("\n");
+
+//   const sourceCounts = {};
+//   crmData.leads.forEach((lead) => {
+//     const source = lead.sourceOfOpportunity || "Unknown";
+//     const oppValue = parseFloat(lead.oppValue) || 0; // Ensure numeric value
+
+//     if (!sourceCounts[source]) {
+//       sourceCounts[source] = { total: 0, oppValue: 0 };
+//     }
+
+//     sourceCounts[source].total++;
+//     sourceCounts[source].oppValue += oppValue; // Sum opportunity values
+//   });
+
+//   const campaignCounts = {};
+//   crmData.leads.forEach((lead) => {
+//     const campaign = lead.campaignName || "Unknown";
+//     if (!campaignCounts[campaign]) {
+//       campaignCounts[campaign] = {
+//         totalLeads: 0,
+//         conversionRate: 0,
+//         revenueImpact: 0,
+//       };
+//     }
+//     campaignCounts[campaign].totalLeads++;
+//     campaignCounts[campaign].conversionRate += parseFloat(lead.conversionRate) || 0;
+//     campaignCounts[campaign].revenueImpact += parseFloat(lead.revenueImpact) || 0;
+//   });
+
+//   const campaignTable = Object.entries(campaignCounts)
+//     .map(([campaign, data]) => {
+//       const percentage = ((data.totalLeads / crmData.totalLeads) * 100).toFixed(2) + "%";
+//       const formattedRevenueImpact = `$${data.revenueImpact.toLocaleString()}`;
+//       return `| ${formatCell(campaign, widths.campaign)} | ${formatCell(data.totalLeads, widths.leadsGenerated)} | ${formatCell(percentage, widths.percentage)} | ${formatCell(formattedRevenueImpact, widths.revenueImpact)} |`;
+//     })
+//     .join("\n");
+
+//   // Format Detailed Lead Information
+//   const detailedLeadsTable = crmData.leads
+//     .map(
+//       (lead) =>
+//         `${formatCell(lead.name, widths.name)} | ${formatCell(
+//           lead.company,
+//           widths.company,
+//           true
+//         )} | ${formatCell(lead.stage, widths.stage)} | ${formatCell(
+//           lead.score,
+//           widths.score
+//         )} | ${formatCell(lead.status, widths.status)} | ${formatCell(
+//           lead.oppValue,
+//           widths.dealSize
+//         )} | ${formatCell(lead.lastContact, widths.lastContact)} |`
+//     )
+//     .join("\n");
+
+//   const totalLeads =
+//     crmData.totalLeads ||
+//     Object.values(sourceCounts).reduce((sum, s) => sum + s.total, 0);
+
+//     const leadSourceTable = Object.entries(sourceCounts)
+//     .map(([source, { total, oppValue }]) => {
+//       const percentage = ((total / totalLeads) * 100).toFixed(2) + "%";
+//       const formattedOppValue = oppValue ? `$${oppValue.toLocaleString()}` : "N/A";
+  
+//       return `| ${formatCell(source, 20)} | ${formatCell(total, 10)} | ${formatCell(formattedOppValue, 15)} | ${formatCell(percentage, 15)} |`;
+//     })
+//     .join("\n");
+
+//   const promptExample = `
+//   Subject: Daily Lead Summary – Report ${todayDate}
+
+//   Hello [Executive Name],
+
+//   Below is your CRM daily lead summary report to support decision-making on closing leads.
+
+//   Overall Pipeline Metrics
+//   Metric                         | Value
+//   -------------------------------|----------------
+//   Total Leads in Pipeline        | ${crmData.totalLeads || "N/A"}
+
+//   Detailed Lead Information
+//   ${formatCell("Lead Name", widths.name)} | ${formatCell(
+//     "Company",
+//     widths.company
+//   )} | ${formatCell("Stage", widths.stage)} | ${formatCell(
+//     "Lead Score",
+//     widths.score
+//   )} | ${formatCell("Status", widths.status)} | ${formatCell(
+//     "Deal Size",
+//     widths.dealSize
+//   )}
+//   ${"-".repeat(widths.name)} | ${"-".repeat(widths.company)} | ${"-".repeat(
+//     widths.stage
+//   )} | ${"-".repeat(widths.score)} | ${"-".repeat(
+//     widths.status
+//   )} | ${"-".repeat(widths.dealSize)}
+//   ${detailedLeadsTable}
+
+//    *Breakdown by Lead Source*
+//   | Source               | # of Leads | Valuation | % of Total Leads |
+//   |----------------------|------------|-----------------|------------------|
+//   ${leadSourceTable}
+
+//   *Campaign Performance Table*
+//   | Campaign Name        | Total Leads | Percentage | Revenue Impact |
+//   |----------------------|-------------|------------|----------------|
+//   ${campaignTable}
+
+//   **Breakdown by Country**
+//   | Country             | Leads Count | Total Valuation |
+//   |---------------------|-------------|----------------|
+//   ${countryTable}
+
+
+
+
+//   Thank you,
+//   SpiderX Sales AI
+
+//   CRM Data for Reference:
+
+//   \`\`\`yaml
+//   ${crmDataYaml}
+//   \`\`\`
+//   `;
+
+//   return promptExample;
+// };
+
+// new-2
+
+// export const generatePrompt = async () => {
+//   const crmData = await fetchCRMData();
+//   const todayDate = getCurrentDate();
+//   let crmDataYaml = yaml.dump(crmData);
+
+//   const widths = {
+//     name: 20,
+//     company: 20,
+//     stage: 15,
+//     score: 10,
+//     status: 10,
+//     dealSize: 12,
+//     lastContact: 12,
+//     campaign: 25,
+//     leadsGenerated: 18,
+//     conversionRate: 18,
+//     revenueImpact: 18,
+//     source: 20,
+//     totalLeads: 15,
+//     qualifiedLeads: 18,
+//     winRate: 12,
+//   };
+
+//   const countryCounts = {};
+//   crmData.leads.forEach((lead) => {
+//     const country = lead.country || "Unknown";
+//     const oppValue = parseFloat(lead.oppValue) || 0;
+
+//     if (!countryCounts[country]) {
+//       countryCounts[country] = { total: 0, totalValuation: 0 };
+//     }
+
+//     countryCounts[country].total++;
+//     countryCounts[country].totalValuation += oppValue;
+//   });
+
+//   const countryTable = Object.entries(countryCounts)
+//     .map(([country, { total, totalValuation }]) => {
+//       const formattedValuation = totalValuation
+//         ? `$${totalValuation.toLocaleString()}`
+//         : "N/A";
+//       return `<tr>
+//         <td style="padding: 8px; text-align: left;">${country}</td>
+//         <td style="padding: 8px; text-align: left;">${total}</td>
+//         <td style="padding: 8px; text-align: left;">${formattedValuation}</td>
+//       </tr>`;
+//     })
+//     .join("");
+
+//   const sourceCounts = {};
+//   crmData.leads.forEach((lead) => {
+//     const source = lead.sourceOfOpportunity || "Unknown";
+//     const oppValue = parseFloat(lead.oppValue) || 0;
+
+//     if (!sourceCounts[source]) {
+//       sourceCounts[source] = { total: 0, oppValue: 0 };
+//     }
+
+//     sourceCounts[source].total++;
+//     sourceCounts[source].oppValue += oppValue;
+//   });
+
+//   const campaignCounts = {};
+//   crmData.leads.forEach((lead) => {
+//     const campaign = lead.campaignName || "Unknown";
+//     if (!campaignCounts[campaign]) {
+//       campaignCounts[campaign] = {
+//         totalLeads: 0,
+//         conversionRate: 0,
+//         revenueImpact: 0,
+//       };
+//     }
+//     campaignCounts[campaign].totalLeads++;
+//     campaignCounts[campaign].conversionRate +=
+//       parseFloat(lead.conversionRate) || 0;
+//     campaignCounts[campaign].revenueImpact += parseFloat(lead.revenueImpact) || 0;
+//   });
+
+//   const campaignTable = Object.entries(campaignCounts)
+//     .map(([campaign, data]) => {
+//       const percentage = ((data.totalLeads / crmData.totalLeads) * 100).toFixed(2) + "%";
+//       const formattedRevenueImpact = `$${data.revenueImpact.toLocaleString()}`;
+//       return `<tr>
+//         <td style="padding: 8px; text-align: left;">${campaign}</td>
+//         <td style="padding: 8px; text-align: left;">${data.totalLeads}</td>
+//         <td style="padding: 8px; text-align: left;">${percentage}</td>
+//         <td style="padding: 8px; text-align: left;">${formattedRevenueImpact}</td>
+//       </tr>`;
+//     })
+//     .join("");
+
+//   const detailedLeadsTable = crmData.leads
+//     .map(
+//       (lead) => `<tr>
+//         <td style="padding: 8px; text-align: left;">${lead.name}</td>
+//         <td style="padding: 8px; text-align: left;">${lead.company}</td>
+//         <td style="padding: 8px; text-align: left;">${lead.stage}</td>
+//         <td style="padding: 8px; text-align: left;">${lead.score}</td>
+//         <td style="padding: 8px; text-align: left;">${lead.status}</td>
+//         <td style="padding: 8px; text-align: left;">${lead.oppValue}</td>
+//       </tr>`
+//     )
+//     .join("");
+
+//   const totalLeads =
+//     crmData.totalLeads ||
+//     Object.values(sourceCounts).reduce((sum, s) => sum + s.total, 0);
+
+//   const leadSourceTable = Object.entries(sourceCounts)
+//     .map(([source, { total, oppValue }]) => {
+//       const percentage = ((total / totalLeads) * 100).toFixed(2) + "%";
+//       const formattedOppValue = oppValue ? `$${oppValue.toLocaleString()}` : "N/A";
+//       return `<tr>
+//         <td style="padding: 8px; text-align: left;">${source}</td>
+//         <td style="padding: 8px; text-align: left;">${total}</td>
+//         <td style="padding: 8px; text-align: left;">${formattedOppValue}</td>
+//         <td style="padding: 8px; text-align: left;">${percentage}</td>
+//       </tr>`;
+//     })
+//     .join("");
+
+//   const promptExample = `
+//     <html>
+//       <body style="color: black;">
+//         <p><strong></strong> Daily Lead Summary – Report ${todayDate}</p>
+//         <p>Hello [Executive Name],</p>
+
+//         <p>Below is your CRM daily lead summary report to support decision-making on closing leads.</p>
+
+//         <h3>Overall Pipeline Metrics</h3>
+//         <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">
+//           <tr>
+//             <th style="padding: 8px; text-align: left;">Metric</th>
+//             <th style="padding: 8px; text-align: left;">Value</th>
+//           </tr>
+//           <tr>
+//             <td style="padding: 8px; text-align: left;">Total Leads in Pipeline</td>
+//             <td style="padding: 8px; text-align: left;">${crmData.totalLeads || "N/A"}</td>
+//           </tr>
+//         </table>
+
+//         <h3>Detailed Lead Information</h3>
+//         <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">
+//           <tr>
+//             <th style="padding: 8px; text-align: left;">Lead Name</th>
+//             <th style="padding: 8px; text-align: left;">Company</th>
+//             <th style="padding: 8px; text-align: left;">Stage</th>
+//             <th style="padding: 8px; text-align: left;">Lead Score</th>
+//             <th style="padding: 8px; text-align: left;">Status</th>
+//             <th style="padding: 8px; text-align: left;">Deal Size</th>
+//           </tr>
+//           ${detailedLeadsTable}
+//         </table>
+
+//         <h3>Breakdown by Lead Source</h3>
+//         <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">
+//           <tr>
+//             <th style="padding: 8px; text-align: left;">Source</th>
+//             <th style="padding: 8px; text-align: left;"># of Leads</th>
+//             <th style="padding: 8px; text-align: left;">Valuation</th>
+//             <th style="padding: 8px; text-align: left;">% of Total Leads</th>
+//           </tr>
+//           ${leadSourceTable}
+//         </table>
+
+//         <h3>Campaign Performance Table</h3>
+//         <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">
+//           <tr>
+//             <th style="padding: 8px; text-align: left;">Campaign Name</th>
+//             <th style="padding: 8px; text-align: left;">Total Leads</th>
+//             <th style="padding: 8px; text-align: left;">Percentage</th>
+//             <th style="padding: 8px; text-align: left;">Revenue Impact</th>
+//           </tr>
+//           ${campaignTable}
+//         </table>
+
+//         <h3>Breakdown by Country</h3>
+//         <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">
+//           <tr>
+//             <th style="padding: 8px; text-align: left;">Country</th>
+//             <th style="padding: 8px; text-align: left;">Leads Count</th>
+//             <th style="padding: 8px; text-align: left;">Total Valuation</th>
+//           </tr>
+//           ${countryTable}
+//         </table>
+
+//         <p>Thank you,</p>
+//         <p>SpiderX Sales AI</p>
+
+//       </body>
+//     </html>
+//   `;
+
+//   return promptExample;
+// };
 
 
 export const generatePrompt = async () => {
@@ -206,75 +413,146 @@ export const generatePrompt = async () => {
   const todayDate = getCurrentDate();
   let crmDataYaml = yaml.dump(crmData);
 
-  // Define column widths
-  const widths = {
-    name: 20,
-    company: 20,
-    stage: 15,
-    score: 10,
-    status: 10,
-    dealSize: 12,
-    lastContact: 12,
-  };
+  const widths = { name: 20, company: 20, stage: 15, score: 10, status: 10, dealSize: 12, lastContact: 12, campaign: 25, leadsGenerated: 18, conversionRate: 18, revenueImpact: 18, source: 20, totalLeads: 15, qualifiedLeads: 18, winRate: 12 };
 
-  // Format Detailed Lead Information
-  const detailedLeadsTable = crmData.leads
-  .map(
-    (lead) =>
-      `${formatCell(lead.name, widths.name)} | ${formatCell(
-        lead.company,
-        widths.company,
-        true 
-      )} | ${formatCell(lead.stage, widths.stage)} | ${formatCell(
-        lead.score,
-        widths.score
-      )} | ${formatCell(lead.status, widths.status)} | ${formatCell(
-        lead.dealSize,
-        widths.dealSize
-      )} | ${formatCell(lead.lastContact, widths.lastContact)} |`
-  )
-  .join("\n");
+  const countryCounts = {};
+  crmData.leads.forEach((lead) => {
+    const country = lead.country || "Unknown";
+    const oppValue = parseFloat(lead.oppValue) || 0;
+    if (!countryCounts[country]) countryCounts[country] = { total: 0, totalValuation: 0 };
+    countryCounts[country].total++;
+    countryCounts[country].totalValuation += oppValue;
+  });
 
+  const countryTable = Object.entries(countryCounts).map(([country, { total, totalValuation }]) => {
+    const formattedValuation = totalValuation ? `$${totalValuation.toLocaleString()}` : "N/A";
+    return `<tr><td style="padding: 8px; text-align: left;">${country}</td><td style="padding: 8px; text-align: left;">${total}</td><td style="padding: 8px; text-align: left;">${formattedValuation}</td></tr>`;
+  }).join("");
+
+  const sourceCounts = {};
+  crmData.leads.forEach((lead) => {
+    const source = lead.sourceOfOpportunity || "Unknown";
+    const oppValue = parseFloat(lead.oppValue) || 0;
+    if (!sourceCounts[source]) sourceCounts[source] = { total: 0, oppValue: 0 };
+    sourceCounts[source].total++;
+    sourceCounts[source].oppValue += oppValue;
+  });
+
+  const campaignCounts = {};
+  crmData.leads.forEach((lead) => {
+    const campaign = lead.campaignName || "Unknown";
+    if (!campaignCounts[campaign]) campaignCounts[campaign] = { totalLeads: 0, conversionRate: 0, revenueImpact: 0 };
+    campaignCounts[campaign].totalLeads++;
+    campaignCounts[campaign].conversionRate += parseFloat(lead.conversionRate) || 0;
+    campaignCounts[campaign].revenueImpact += parseFloat(lead.revenueImpact) || 0;
+  });
+
+  const campaignTable = Object.entries(campaignCounts).map(([campaign, data]) => {
+    const percentage = ((data.totalLeads / crmData.totalLeads) * 100).toFixed(2) + "%";
+    const formattedRevenueImpact = `$${data.revenueImpact.toLocaleString()}`;
+    return `<tr><td style="padding: 8px; text-align: left;">${campaign}</td><td style="padding: 8px; text-align: left;">${data.totalLeads}</td><td style="padding: 8px; text-align: left;">${percentage}</td><td style="padding: 8px; text-align: left;">${formattedRevenueImpact}</td></tr>`;
+  }).join("");
+
+  const detailedLeadsTable = crmData.leads.map((lead) => `<tr><td style="padding: 8px; text-align: left;">${lead.name}</td><td style="padding: 8px; text-align: left;">${lead.company}</td><td style="padding: 8px; text-align: left;">${lead.stage}</td><td style="padding: 8px; text-align: left;">${lead.score}</td><td style="padding: 8px; text-align: left;">${lead.status}</td><td style="padding: 8px; text-align: left;">${lead.oppValue}</td></tr>`).join("");
+
+  const totalLeads = crmData.totalLeads || Object.values(sourceCounts).reduce((sum, s) => sum + s.total, 0);
+
+  const leadSourceTable = Object.entries(sourceCounts).map(([source, { total, oppValue }]) => {
+    const percentage = ((total / totalLeads) * 100).toFixed(2) + "%";
+    const formattedOppValue = oppValue ? `$${oppValue.toLocaleString()}` : "N/A";
+    return `<tr><td style="padding: 8px; text-align: left;">${source}</td><td style="padding: 8px; text-align: left;">${total}</td><td style="padding: 8px; text-align: left;">${formattedOppValue}</td><td style="padding: 8px; text-align: left;">${percentage}</td></tr>`;
+  }).join("");
 
   const promptExample = `
-Subject: Daily Lead Summary – Report ${todayDate}
+    <html>
+      <head>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+        <style>
+          body {
+            font-family: 'Roboto', sans-serif;
+            color: black;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+          th, td {
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #ddd;
+          }
+          th {
+            background-color: #f2f2f2;
+          }
+        </style>
+      </head>
+      <body>
+        <p><strong>Daily Lead Summary – Report ${todayDate}</strong>(Top 15 Deals) - [Preview Mode]</p>
+        <p>Hello,</p>
+        <p>Below is the CRM daily lead summary report to support decision-making on closing leads.</p>
 
-Hello [Executive Name],
+        <h3>Overall Pipeline Metrics</h3>
+        <table>
+          <tr>
+            <th>Metric</th>
+            <th>Value</th>
+          </tr>
+          <tr>
+            <td>Total Leads in Pipeline</td>
+            <td>${crmData.totalLeads || "N/A"}</td>
+          </tr>
+        </table>
 
-Below is your CRM daily lead summary report to support decision-making on closing leads.
+        <h3>Detailed Lead Information</h3>
+        <table>
+          <tr>
+            <th>Lead Name</th>
+            <th>Company</th>
+            <th>Stage</th>
+            <th>Lead Score</th>
+            <th>Status</th>
+            <th>Deal Size</th>
+          </tr>
+          ${detailedLeadsTable}
+        </table>
 
-Overall Pipeline Metrics  
-Metric                         | Value  
--------------------------------|----------------  
-Total Leads in Pipeline        | ${crmData.totalLeads || "N/A"}  
-Qualified Leads                | ${crmData.qualifiedLeads || "N/A"}  
+        <h3>Breakdown by Lead Source</h3>
+        <table>
+          <tr>
+            <th>Source</th>
+            <th># of Leads</th>
+            <th>Valuation</th>
+            <th>% of Total Leads</th>
+          </tr>
+          ${leadSourceTable}
+        </table>
 
-Detailed Lead Information  
-${formatCell("Lead Name", widths.name)} | ${formatCell(
-    "Company",
-    widths.company
-  )} | ${formatCell("Stage", widths.stage)} | ${formatCell(
-    "Lead Score",
-    widths.score
-  )} | ${formatCell("Status", widths.status)} | ${formatCell(
-    "Deal Size",
-    widths.dealSize
-  )} |
-${"-".repeat(widths.name)} | ${"-".repeat(widths.company)} | ${"-".repeat(
-    widths.stage
-  )} | ${"-".repeat(widths.score)} | ${"-".repeat(widths.dealSize)} |  
-${detailedLeadsTable}
+        <h3>Campaign Performance Table</h3>
+        <table>
+          <tr>
+            <th>Campaign Name</th>
+            <th>Total Leads</th>
+            <th>Percentage</th>
+            <th>Revenue Impact</th>
+          </tr>
+          ${campaignTable}
+        </table>
 
+        <h3>Breakdown by Country</h3>
+        <table>
+          <tr>
+            <th>Country</th>
+            <th>Leads Count</th>
+            <th>Total Valuation</th>
+          </tr>
+          ${countryTable}
+        </table>
 
-Thank you,  
-SpiderX Sales AI
-
-CRM Data for Reference:
-
-\`\`\`yaml
-${crmDataYaml}
-\`\`\`
-`;
+        <p>Thank you,</p>
+        <p>SpiderX Sales AI</p>
+      </body>
+    </html>
+  `;
 
   return promptExample;
 };
