@@ -70,7 +70,6 @@ async function updateScore(itemId, score) {
       return false;
     }
 
-    console.log(`✅ Score updated to ${score} for item ${itemId}`);
     return true;
   } catch (error) {
     console.error(`❌ Error updating Score for item ${itemId}:`, error.message);
@@ -127,8 +126,6 @@ async function updateMondayLeadScore(boardId, pulseId, leadScore) {
             }
         `;
   
-      console.log("📡 Sending Lead Score update to Monday.com:", mutation);
-  
       const response = await axios.post(
         "https://api.monday.com/v2",
         { query: mutation },
@@ -138,11 +135,6 @@ async function updateMondayLeadScore(boardId, pulseId, leadScore) {
             Authorization: MONDAY_API_KEY,
           },
         }
-      );
-  
-      console.log(
-        "✅ Monday API Response:",
-        JSON.stringify(response.data, null, 2)
       );
   
       if (response.data.errors) {
@@ -176,8 +168,6 @@ async function updateMondayLeadScore(boardId, pulseId, leadScore) {
             }
         `;
   
-      console.log("📡 Sending Deal Score update to Monday.com:", mutation);
-  
       const response = await axios.post(
         "https://api.monday.com/v2",
         { query: mutation },
@@ -187,11 +177,6 @@ async function updateMondayLeadScore(boardId, pulseId, leadScore) {
             Authorization: MONDAY_API_KEY,
           },
         }
-      );
-  
-      console.log(
-        "✅ Monday API Response:",
-        JSON.stringify(response.data, null, 2)
       );
   
       if (response.data.errors) {
@@ -230,7 +215,6 @@ async function updateMondayLeadScore(boardId, pulseId, leadScore) {
             }
         `;
   
-      console.log("📡 Sending update to Monday.com:", mutation);
   
       const response = await axios.post(
         "https://api.monday.com/v2",
@@ -242,12 +226,7 @@ async function updateMondayLeadScore(boardId, pulseId, leadScore) {
           },
         }
       );
-  
-      console.log(
-        "✅ Monday API Response:",
-        JSON.stringify(response.data, null, 2)
-      );
-  
+
       if (response.data.errors) {
         console.error("❌ Monday API Error:", response.data.errors);
         return false;
@@ -267,10 +246,7 @@ async function updateMondayLeadScore(boardId, pulseId, leadScore) {
 function formatDate(dateString) {
   if (!dateString) return null;
 
-  console.log("📥 Received date for formatting:", dateString);
-
   const cleanedDateString = dateString.replace(/\+\d{2}(:\d{2}|\.\d{2})?$/, "");
-  console.log("🔄 Cleaned Date String:", cleanedDateString);
 
   let parsedDate = moment.utc(cleanedDateString, moment.ISO_8601, true);
   if (!parsedDate.isValid()) {
@@ -281,13 +257,11 @@ function formatDate(dateString) {
   let istDate = parsedDate.tz("Asia/Kolkata");
 
   const formattedDate = istDate.format("YYYY-MM-DD");
-  console.log("✅ Final Formatted Date (IST):", formattedDate);
 
   return formattedDate;
 }
 
 async function updateMondayColumn(boardId, itemId, columnId, value) {
-    console.log(boardId, itemId, columnId, value);
   
     const query = `
       mutation {
@@ -313,8 +287,6 @@ async function updateMondayColumn(boardId, itemId, columnId, value) {
           },
         }
       );
-  
-      console.log("Response", response.data);
   
       if (response.data.errors) {
         console.error(
@@ -371,7 +343,6 @@ async function updateMondayColumn(boardId, itemId, columnId, value) {
   }
 
   async function updateMondayLeadStage(boardId, pulseId, stage) {
-    console.log("Board pulse stage", boardId, pulseId, stage);
     try {
       const query = `
         mutation {
@@ -411,8 +382,6 @@ async function updateMondayColumn(boardId, itemId, columnId, value) {
   
 
 export const mondayWebhooks = async (req, res) => {
-  console.log("Inside here");
-  // console.log("🔍 Webhook Payload:", JSON.stringify(req.body, null, 2));
 
   try {
     if (req.body.challenge) {
@@ -426,110 +395,104 @@ export const mondayWebhooks = async (req, res) => {
 
     const { boardId, pulseId, type, columnId, value, previousValue } = event;
 
-    console.log("🛠️ Debugging columnId before condition check:", columnId);
-    console.log("✅ Expected column ID for Lead Score:", LEAD_SCORE_COLUMN_ID);
-    console.log("✅ Event Type:", type);
 
     if (!boardId || !pulseId) {
       return res.status(400).json({ error: "Missing boardId or pulseId" });
     }
 
-    // ✅ Date Change Handling
-
-    // if (
-    //   type === "create_pulse" ||
-    //   (type === "change_column_value" && columnId === TEXT_DATE_COLUMN_ID)
-    // ) {
-    //   let dateText =
-    //     type === "create_pulse"
-    //       ? await getMondayColumnValue(boardId, pulseId, TEXT_DATE_COLUMN_ID)
-    //       : value.text || value;
-
-    //   if (!dateText || (previousValue && previousValue.text === dateText)) {
-    //     return res
-    //       .status(200)
-    //       .json({ message: "No Date change detected, skipping update" });
-    //   }
-    //   console.log("Here");
-    //   const formattedDate = formatDate(dateText);
-    //   if (!formattedDate) {
-    //     return res.status(400).json({ error: "Invalid date format" });
-    //   }
-
-    //   // console.log("📝 Updating Created Date column...");
-    //   const updateSuccess = await updateMondayDate(
-    //     boardId,
-    //     pulseId,
-    //     formattedDate
-    //   );
-    //   return res.status(updateSuccess ? 200 : 500).json({
-    //     message: updateSuccess
-    //       ? "Date updated successfully"
-    //       : "Failed to update Created Date",
-    //   });
-    // }
 
     if (
       type === "create_pulse" ||
-      (["change_column_value", "update_column_value"].includes(type) &&
-        columnId === TEXT_DATE_COLUMN_ID)
+      (type === "change_column_value" && columnId === TEXT_DATE_COLUMN_ID)
     ) {
-      console.log("🚀 Entering Date Update Condition...");
-      console.log(`📌 Event Type: ${type}`);
-      console.log(`📌 Received columnId: ${columnId}`);
-      console.log(`📌 Expected TEXT_DATE_COLUMN_ID: ${TEXT_DATE_COLUMN_ID}`);
-
-      if (columnId !== TEXT_DATE_COLUMN_ID) {
-        console.log(
-          "❌ columnId does NOT match TEXT_DATE_COLUMN_ID, skipping..."
-        );
-        return res
-          .status(400)
-          .json({ error: "Incorrect column for date update" });
-      }
-
-      // 🔍 Fetching the date text
       let dateText =
         type === "create_pulse"
           ? await getMondayColumnValue(boardId, pulseId, TEXT_DATE_COLUMN_ID)
-          : value?.text || value;
+          : value.text || value;
 
-      console.log(`📆 Extracted Date Text: ${dateText}`);
-
-      // 🛑 Check if date is missing or unchanged
       if (!dateText || (previousValue && previousValue.text === dateText)) {
-        console.log("⏩ No Date change detected, skipping update.");
         return res
           .status(200)
           .json({ message: "No Date change detected, skipping update" });
       }
-
-      console.log("✅ Processing Date Update...");
-
-      // 🔹 Format the date
       const formattedDate = formatDate(dateText);
-      console.log(`📅 Formatted Date: ${formattedDate}`);
-
       if (!formattedDate) {
-        console.log("❌ Invalid date format received!");
         return res.status(400).json({ error: "Invalid date format" });
       }
 
-      // ✅ Updating the Created Date column in Monday.com
       const updateSuccess = await updateMondayDate(
         boardId,
         pulseId,
         formattedDate
       );
-
-      if (updateSuccess) {
-        console.log("✅ Date updated successfully!");
-        return res.status(200).json({ message: "Date updated successfully" });
-      } else {
-        console.log("❌ Failed to update Created Date");
-        return res.status(500).json({ error: "Failed to update Created Date" });
-      }
+      return res.status(updateSuccess ? 200 : 500).json({
+        message: updateSuccess
+          ? "Date updated successfully"
+          : "Failed to update Created Date",
+      });
     }
+
+    // if (
+    //   type === "create_pulse" ||
+    //   (["change_column_value", "update_column_value"].includes(type) &&
+    //     columnId === TEXT_DATE_COLUMN_ID)
+    // ) {
+    //   console.log("🚀 Entering Date Update Condition...");
+    //   console.log(`📌 Event Type: ${type}`);
+    //   console.log(`📌 Received columnId: ${columnId}`);
+    //   console.log(`📌 Expected TEXT_DATE_COLUMN_ID: ${TEXT_DATE_COLUMN_ID}`);
+
+    //   if (columnId !== TEXT_DATE_COLUMN_ID) {
+    //     console.log(
+    //       "❌ columnId does NOT match TEXT_DATE_COLUMN_ID, skipping..."
+    //     );
+    //     return res
+    //       .status(400)
+    //       .json({ error: "Incorrect column for date update" });
+    //   }
+
+    //   // 🔍 Fetching the date text
+    //   let dateText =
+    //     type === "create_pulse"
+    //       ? await getMondayColumnValue(boardId, pulseId, TEXT_DATE_COLUMN_ID)
+    //       : value?.text || value;
+
+    //   console.log(`📆 Extracted Date Text: ${dateText}`);
+
+    //   // 🛑 Check if date is missing or unchanged
+    //   if (!dateText || (previousValue && previousValue.text === dateText)) {
+    //     console.log("⏩ No Date change detected, skipping update.");
+    //     return res
+    //       .status(200)
+    //       .json({ message: "No Date change detected, skipping update" });
+    //   }
+
+    //   console.log("✅ Processing Date Update...");
+
+    //   // 🔹 Format the date
+    //   const formattedDate = formatDate(dateText);
+    //   console.log(`📅 Formatted Date: ${formattedDate}`);
+
+    //   if (!formattedDate) {
+    //     console.log("❌ Invalid date format received!");
+    //     return res.status(400).json({ error: "Invalid date format" });
+    //   }
+
+    //   // ✅ Updating the Created Date column in Monday.com
+    //   const updateSuccess = await updateMondayDate(
+    //     boardId,
+    //     pulseId,
+    //     formattedDate
+    //   );
+
+    //   if (updateSuccess) {
+    //     console.log("✅ Date updated successfully!");
+    //     return res.status(200).json({ message: "Date updated successfully" });
+    //   } else {
+    //     console.log("❌ Failed to update Created Date");
+    //     return res.status(500).json({ error: "Failed to update Created Date" });
+    //   }
+    // }
 
     if (
       (type === "change_column_value" || type === "update_column_value") &&
@@ -648,13 +611,8 @@ export const mondayWebhooks = async (req, res) => {
       (type === "change_column_value" || type === "update_column_value") &&
       columnId === "deal_stage"
     ) {
-      console.log("🚀 Triggered status update event!");
-
-      console.log(`📌 Event Type: ${type}`);
-      console.log(`📋 Column ID: ${columnId} (Expected: ${STATUS_COLUMN_ID})`);
 
       if (!value.label?.text) {
-        console.log("⚠️ Empty status received, skipping update.");
         return res
           .status(200)
           .json({ message: "No valid status change detected." });
@@ -662,37 +620,17 @@ export const mondayWebhooks = async (req, res) => {
 
       const newStatus = value.label?.text.trim().replace(/\s+/g, " ");
 
-      console.log("🆕 Normalized New Status:", newStatus);
       const previousStatus = previousValue?.label?.text;
 
-      console.log("🆕 New Status:", newStatus);
-      console.log("📜 Previous Status:", previousStatus);
-
-      console.log(
-        "🔹 Full Webhook Payload:",
-        JSON.stringify(req.body, null, 2)
-      );
-      console.log("🔹 Checking value.label:", value?.label);
-      console.log("🔹 Checking previousValue.label:", previousValue?.label);
-
       if (!newStatus || !DEAL_LEAD_SCORE_MAPPING.hasOwnProperty(newStatus)) {
-        console.log(
-          "❌ Invalid or missing status value, skipping update. Received:",
-          newStatus
-        );
         return res.status(400).json({ error: "Invalid status value" });
       }
 
-      console.log("✅ Valid status detected, processing update...");
 
       const newLeadScore = DEAL_LEAD_SCORE_MAPPING[newStatus];
       const previousLeadScore = previousStatus
         ? DEAL_LEAD_SCORE_MAPPING[previousStatus]
         : null;
-
-      console.log("📊 Lead Score Mapping:", DEAL_LEAD_SCORE_MAPPING);
-      console.log(`🎯 New Lead Score: ${newLeadScore}`);
-      console.log(`📉 Previous Lead Score: ${previousLeadScore}`);
 
       if (previousLeadScore === null) {
         console.log(
@@ -704,7 +642,6 @@ export const mondayWebhooks = async (req, res) => {
         );
 
         const scoreChange = newLeadScore - previousLeadScore;
-        console.log(`📊 Score Change: ${scoreChange}`);
 
         if (scoreChange < 0) {
           console.log(`📉 Lead Score decreased by ${Math.abs(scoreChange)}`);
@@ -714,10 +651,6 @@ export const mondayWebhooks = async (req, res) => {
           console.log("🔄 No change in lead score.");
         }
       }
-
-      console.log(
-        `📋 Updating Lead Score for Pulse ID: ${pulseId}, Board ID: ${DEMO_BOARD_ID}`
-      );
 
       try {
         const updateSuccess = await updateMondayDealScore(
@@ -784,35 +717,28 @@ export const mondayWebhooks = async (req, res) => {
 };
 
 export const managerScoreValue = async (req, res) => {
-  console.log("🔹 Full Webhook Payload:", JSON.stringify(req.body, null, 2));
 
   if (req.body.challenge) {
-    console.log("🔹 Responding to challenge...");
     return res.json({ challenge: req.body.challenge });
   }
 
   const event = req.body.event;
 
-  // Check if the event is a "move_pulse_into_board" (item moved into the board)
   if (!event || event.type !== "move_pulse_into_board") {
     console.log("⚠️ Webhook ignored: Not an item move event.");
     return res.status(200).json({ message: "Event ignored" });
   }
 
-  // Ensure the item is moved into the "topics" group
   if (event.destGroupId !== "topics") {
-    console.log(`⚠️ Item moved, but not into 'topics'. Ignoring.`);
     return res
       .status(200)
       .json({ message: "Item moved but not into target group." });
   }
 
   const newItemId = event.pulseId;
-  console.log(`✅ Item ${newItemId} moved into 'topics'. Updating score...`);
 
   try {
     await updateScore(newItemId, 50);
-    console.log(`✅ Score updated to 50 for item ${newItemId}`);
     res.status(200).json({ message: "Score updated successfully." });
   } catch (error) {
     console.error("❌ Error:", error.response?.data || error.message);

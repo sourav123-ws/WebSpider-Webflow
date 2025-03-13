@@ -146,7 +146,7 @@ export const fetchCRMData = async () => {
 
     structuredLeads = structuredLeads
       .sort((a, b) => b.oppValue - a.oppValue)
-      .slice(0, 15);
+      .slice(0, 25);
 
     const structuredData = {
       totalLeads: structuredLeads.length,
@@ -184,9 +184,9 @@ export const fetchCRMData = async () => {
 export const main = async () => {
   const prompt = await generatePrompt();
   const todayDate = getCurrentDate();
-  const subject = `Daily Lead Summary Report -  ${todayDate} (Top 15 Deals) - [Preview Mode]`
+  const subject = `Daily Lead Summary Report -  ${todayDate} (Top 25 Deals) - [Preview Mode]`
 
-  console.log("Prompt",prompt);
+  // console.log("Prompt",prompt);
 
   // sendMail(
   //   "dipesh.majumder@webspiders.com",

@@ -7,6 +7,7 @@ const MONDAY_API_KEY = process.env.MONDAY_API_KEY;
 
 const BOARD_ID = process.env.BOARD_ID;
 const GROUP_ID = process.env.GROUP_ID;
+const RECRUITMENT_BOARD_ID = process.env.RECRUITMENT_BOARD_ID;
 
 
 if (!MONDAY_API_KEY || !BOARD_ID || !GROUP_ID) {
@@ -16,7 +17,6 @@ if (!MONDAY_API_KEY || !BOARD_ID || !GROUP_ID) {
 
 const mapWebflowFields = (formName, formData, submittedAt) => {
   let mappedData = { date: new Date(submittedAt).toISOString().split("T")[0] };
-  console.log("form data", formData);
   mappedData = {
     ...mappedData,
     lead:
@@ -40,12 +40,10 @@ const mapWebflowFields = (formName, formData, submittedAt) => {
     referral_url: formData["URL"] || "N/A",
   };
 
-  console.log("Mapped Data", mappedData);
   return mappedData;
 };
 
 export const webflowWebhooks = async (req, res) => {
-  console.log("✅ Webflow Webhook Received!");
 
   const { payload } = req.body;
   if (!payload) {
@@ -61,7 +59,6 @@ export const webflowWebhooks = async (req, res) => {
   console.log(`📌 Form Submitted: ${formName}`);
 
   const mappedData = mapWebflowFields(formName, formData, submittedAt);
-  console.log("📝 Mapped Data:", mappedData);
 
   const columnValues = {
     date4: mappedData.date,
@@ -98,15 +95,10 @@ export const webflowWebhooks = async (req, res) => {
       }
     );
 
-    console.log("✅ Data saved to Monday.com:", response.data);
     res
       .status(200)
       .json({ success: true, message: `Received and saved form: ${formName}` });
   } catch (error) {
-    console.error(
-      "❌ Error saving to Monday.com:",
-      error.response?.data || error.message
-    );
     res.status(500).json({
       success: false,
       message: "Error saving to Monday.com",
@@ -114,3 +106,11 @@ export const webflowWebhooks = async (req, res) => {
     });
   }
 };
+
+export const getRecruitmentDetails = async()=>{
+  try {
+    
+  } catch (error) {
+    
+  }
+}

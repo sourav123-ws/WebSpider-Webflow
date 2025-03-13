@@ -46,9 +46,14 @@ export const generatePrompt = async () => {
   const countryTable = Object.entries(countryCounts)
     .map(([country, { total, totalValuation }]) => {
       const formattedValuation = totalValuation
-        ? `$${totalValuation.toLocaleString()}`
+        ? totalValuation.toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })
         : "N/A";
-      return `<tr><td style="padding: 8px; text-align: left;">${country}</td><td style="padding: 8px; text-align: left;">${total}</td><td style="padding: 8px; text-align: left;">${formattedValuation}</td></tr>`;
+      return `<tr><td style="padding: 8px; text-align: left;">${country}</td>
+              <td style="padding: 8px; text-align: left;">${total}</td>
+              <td style="padding: 8px; text-align: left;">${formattedValuation}</td></tr>`;
     })
     .join("");
 
@@ -63,33 +68,86 @@ export const generatePrompt = async () => {
 
   const campaignCounts = {};
   crmData.leads.forEach((lead) => {
+    console.log("Lead",lead);
     const campaign = lead.campaignName || "Unknown";
     if (!campaignCounts[campaign])
       campaignCounts[campaign] = {
         totalLeads: 0,
         conversionRate: 0,
-        revenueImpact: 0,
+        oppValue: 0
       };
     campaignCounts[campaign].totalLeads++;
     campaignCounts[campaign].conversionRate +=
       parseFloat(lead.conversionRate) || 0;
-    campaignCounts[campaign].revenueImpact +=
-      parseFloat(lead.revenueImpact) || 0;
+    campaignCounts[campaign].oppValue +=
+      parseFloat(lead.oppValue) || 0;
   });
 
   const campaignTable = Object.entries(campaignCounts)
-    .map(([campaign, data]) => {
-      const percentage =
-        ((data.totalLeads / crmData.totalLeads) * 100).toFixed(2) + "%";
-      const formattedRevenueImpact = `$${data.revenueImpact.toLocaleString()}`;
-      return `<tr><td style="padding: 8px; text-align: left;">${campaign}</td><td style="padding: 8px; text-align: left;">${data.totalLeads}</td><td style="padding: 8px; text-align: left;">${percentage}</td><td style="padding: 8px; text-align: left;">${formattedRevenueImpact}</td></tr>`;
-    })
-    .join("");
+  .map(([campaign, data]) => {
+    console.log("Data", data);
+    const percentage =
+      ((data.totalLeads / crmData.totalLeads) * 100).toFixed(2) + "%";
 
+    // Ensure data.totalLeads and data.oppValue are numbers
+    const totalLeads = Number(data.totalLeads) || 0;
+    const revenueImpact = Number(data.oppValue) || 0;
+
+    // Format totalLeads with comma and .00
+    const formattedTotalLeads = totalLeads.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+
+    // Format revenue impact with comma and .00
+    const formattedRevenueImpact = revenueImpact.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+
+    return `<tr>
+      <td style="padding: 8px; text-align: left;">${campaign}</td>
+      <td style="padding: 8px; text-align: left;">${formattedTotalLeads}</td>
+      <td style="padding: 8px; text-align: left;">${percentage}</td>
+      <td style="padding: 8px; text-align: left;">${formattedRevenueImpact}</td>
+    </tr>`;
+  })
+  .join("");
+
+
+
+    const formatDealSize = (dealSize) => {
+      if (!dealSize || isNaN(dealSize)) return "N/A";
+      return parseFloat(dealSize).toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+  };
+
+  const totalDealSize = crmData.leads.reduce(
+    (sum, lead) => sum + (parseFloat(lead.oppValue) || 0),
+    0
+  );
+  const formattedTotalDealSize = `$${totalDealSize.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
   const detailedLeadsTable = crmData.leads
     .map(
       (lead) =>
-        `<tr><td style="padding: 8px; text-align: left;">${lead.name}</td><td style="padding: 8px; text-align: left;">${lead.company}</td><td style="padding: 8px; text-align: left;">${lead.stage}</td><td style="padding: 8px; text-align: left;">${lead.score}</td><td style="padding: 8px; text-align: left;">${lead.status}</td><td style="padding: 8px; text-align: left;">${lead.oppValue}</td></tr>`
+        `<tr><td style="padding: 8px; text-align: left;">${
+          lead.name
+        }</td><td style="padding: 8px; text-align: left;">${
+          lead.company
+        }</td><td style="padding: 8px; text-align: left;">${
+          lead.stage
+        }</td><td style="padding: 8px; text-align: left;">${
+          lead.score
+        }</td><td style="padding: 8px; text-align: left;">${
+          lead.status
+        }</td><td style="padding: 8px; text-align: left;">${formatDealSize(
+          lead.oppValue
+        )}</td></tr>`
     )
     .join("");
 
@@ -97,13 +155,20 @@ export const generatePrompt = async () => {
     crmData.totalLeads ||
     Object.values(sourceCounts).reduce((sum, s) => sum + s.total, 0);
 
-  const leadSourceTable = Object.entries(sourceCounts)
+    const leadSourceTable = Object.entries(sourceCounts)
     .map(([source, { total, oppValue }]) => {
       const percentage = ((total / totalLeads) * 100).toFixed(2) + "%";
       const formattedOppValue = oppValue
-        ? `$${oppValue.toLocaleString()}`
+        ? parseFloat(oppValue).toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })
         : "N/A";
-      return `<tr><td style="padding: 8px; text-align: left;">${source}</td><td style="padding: 8px; text-align: left;">${total}</td><td style="padding: 8px; text-align: left;">${formattedOppValue}</td><td style="padding: 8px; text-align: left;">${percentage}</td></tr>`;
+
+      return `<tr><td style="padding: 8px; text-align: left;">${source}</td>
+              <td style="padding: 8px; text-align: left;">${total}</td>
+              <td style="padding: 8px; text-align: left;">${percentage}</td>
+              <td style="padding: 8px; text-align: left;">${formattedOppValue}</td></tr>`;
     })
     .join("");
 
@@ -145,7 +210,7 @@ export const generatePrompt = async () => {
     </style>
   </head>
   <body style="color:#000000">
-  <p style="margin-bottom: 10px;">Daily Lead Summary Report -  ${todayDate} (Top 15 Deals) - [Preview Mode]</p>
+  <p style="margin-bottom: 10px;">Daily Lead Summary Report -  ${todayDate} (Top 25 Deals) - [Preview Mode]</p>
   <p style="margin-bottom: 10px;">Hello,</p>
   <p style="margin-bottom: 20px;">Below is the CRM daily lead summary report to support decision-making on closing leads.</p>
 
@@ -169,21 +234,34 @@ export const generatePrompt = async () => {
       <th>Stage</th>
       <th>Lead Score</th>
       <th>Status</th>
-      <th>Deal Size</th>
+      <th>Deal Size($)</th>
     </tr>
     ${detailedLeadsTable}
   </table>
+  <table style="margin-top: -1px; border-collapse: collapse; width: 30%; margin-left: auto; background-color: black; color: white;" border="1">
+    <tr>
+      <td style="border: 1px solid white; padding: 8px; font-weight: bold; width: 70%;">Total Deal Size</td>
+      <td style="border: 1px solid white; padding: 8px; font-weight: bold; width: 30%;">${formattedTotalDealSize}</td>
+    </tr>
+</table>
 
   <h3 style="margin-top: 20px; margin-bottom: 10px;">Breakdown by Lead Source</h3>
   <table style="margin-bottom: 20px;">
     <tr>
       <th>Source</th>
-      <th># of Leads</th>
-      <th>Valuation</th>
-      <th>% of Total Leads</th>
+      <th>Total Leads</th>
+      <th>Leads(%)</th>
+      <th>Total Deal Size($)</th>
     </tr>
     ${leadSourceTable}
   </table>
+  <table style="margin-top: -1px; border-collapse: collapse; width: 30%; margin-left: auto; background-color: black; color: white;" border="1">
+    <tr>
+      <td style="border: 1px solid white; padding: 8px; font-weight: bold; width: 70%;">Total Deal Size</td>
+      <td style="border: 1px solid white; padding: 8px; font-weight: bold; width: 30%;">${formattedTotalDealSize}</td>
+    </tr>
+</table> 
+
 
   <h3 style="margin-top: 20px; margin-bottom: 10px;">Campaign Performance Table</h3>
   <table style="margin-bottom: 20px;">
@@ -191,20 +269,52 @@ export const generatePrompt = async () => {
       <th>Campaign Name</th>
       <th>Total Leads</th>
       <th>Percentage</th>
-      <th>Revenue Impact</th>
+      <th>Total Deal Size($)</th>
     </tr>
     ${campaignTable}
   </table>
+  <table style="margin-top: -1px; border-collapse: collapse; width: 30%; margin-left: auto; background-color: black; color: white;" border="1">
+    <tr>
+      <td style="border: 1px solid white; padding: 8px; font-weight: bold; width: 70%;">Total Deal Size</td>
+      <td style="border: 1px solid white; padding: 8px; font-weight: bold; width: 30%;">${formattedTotalDealSize}</td>
+    </tr>
+</table>
 
   <h3 style="margin-top: 20px; margin-bottom: 10px;">Breakdown by Country</h3>
   <table style="margin-bottom: 20px;">
     <tr>
       <th>Country</th>
       <th>Leads Count</th>
-      <th>Total Valuation</th>
+      <th>Total Deal Size($)</th>
     </tr>
     ${countryTable}
   </table>
+  <table style="margin-top: -1px; border-collapse: collapse; width: 30%; margin-left: auto; background-color: black; color: white;" border="1">
+    <tr>
+      <td style="border: 1px solid white; padding: 8px; font-weight: bold; width: 70%;">Total Deal Size</td>
+      <td style="border: 1px solid white; padding: 8px; font-weight: bold; width: 30%;">${formattedTotalDealSize}</td>
+    </tr>
+</table>
+
+  <h3 style="margin-top: 10px; margin-bottom: 10px;">Lead Score Classification</h3>
+<table style="margin-bottom: 10px; border-collapse: collapse; width: 20%;" border="1">
+  <tr>
+    <th style="border: 1px solid black; padding: 8px;">Score Range</th>
+    <th style="border: 1px solid black; padding: 8px;">Classification</th>
+  </tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 8px;">0 - 19</td>
+    <td style="border: 1px solid black; padding: 8px;">Cold</td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 8px;">20 - 79</td>
+    <td style="border: 1px solid black; padding: 8px;">Warm</td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 8px;">80 - 100</td>
+    <td style="border: 1px solid black; padding: 8px;">Hot</td>
+  </tr>
+</table>
 
   <p style="margin-top: 10px; margin-bottom: 10px;">Thank you,</p>
   <p style="margin-bottom: 10px;">SpiderX Sales AI</p>

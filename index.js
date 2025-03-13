@@ -4,7 +4,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { main } from "./monday.js";
 import { managerScoreValue, mondayWebhooks } from "./controllers/monday-webhooks.js";
-import { webflowWebhooks } from "./controllers/webflow-webhooks.js";
+import { getRecruitmentDetails, webflowWebhooks } from "./controllers/webflow-webhooks.js";
 
 dotenv.config();
 
@@ -28,6 +28,7 @@ if (!MONDAY_API_KEY || !BOARD_ID || !GROUP_ID) {
 
 app.post("/webflow-webhook",webflowWebhooks);
 app.post("/monday-webhook",mondayWebhooks);
+app.post("/get-recruitment-details",getRecruitmentDetails)
 app.post("/manage-score-value",managerScoreValue);
 
 
