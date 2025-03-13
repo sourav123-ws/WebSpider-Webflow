@@ -188,12 +188,12 @@ export const main = async () => {
 
   console.log("Prompt",prompt);
 
-  sendMail(
-    "dipesh.majumder@webspiders.com",
-    prompt,
-    subject,
-    "sourav.bhattacherjee@webspiders.com"
-  );
+  // sendMail(
+  //   "dipesh.majumder@webspiders.com",
+  //   prompt,
+  //   subject,
+  //   "sourav.bhattacherjee@webspiders.com"
+  // );
 
   // console.log("Formatted HTML Email Body:", aiTableResponseText);
 };
