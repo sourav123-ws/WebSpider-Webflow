@@ -19,6 +19,7 @@
     "express": "^4.21.2",
     "js-yaml": "^4.1.0",
     "moment-timezone": "^0.5.47",
+    "node-cron": "^3.0.3",
     "nodemailer": "^6.10.0",
     "openai": "^4.86.2"
   }

@@ -1,5 +1,7 @@
-import { fetchCRMData } from "./monday.js";
+import { fetchCRMData , fetchLatestLeadsByDate } from "./monday.js";
 import yaml from "js-yaml";
+
+const MONDAY_API_KEY = process.env.MONDAY_API_KEY ;
 
 export const getCurrentDate = () => {
   const now = new Date();
@@ -10,28 +12,67 @@ export const getCurrentDate = () => {
   });
 };
 
+export const fetchLatestCommentsForLeads = async (leadIds) => {
+  try {
+    // Ensure leadIds is an array
+    if (!Array.isArray(leadIds) || leadIds.length === 0) {
+      throw new Error("Invalid leadIds: Must be a non-empty array");
+    }
+
+    // Construct GraphQL query for multiple leads
+    const query = `
+      query {
+        items(ids: [${leadIds.join(",")}]) {
+          id
+          updates(limit: 1) {
+            text_body
+            created_at
+          }
+        }
+      }
+    `;
+
+    const response = await fetch("https://api.monday.com/v2", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.MONDAY_API_KEY}`, // Ensure API Key is set
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    // Validate response structure
+    const items = data?.data?.items || [];
+    if (items.length === 0) {
+      return leadIds.map(id => ({ leadId: id, comment: "No recent activity", activityDate: "N/A" }));
+    }
+
+    // Process results
+    return items.map(item => ({
+      leadId: item.id,
+      comment: item.updates?.[0]?.text_body || "No comment content",
+      activityDate: item.updates?.[0]?.created_at || "N/A"
+    }));
+
+  } catch (error) {
+    console.error(`Error fetching comments for leads:`, error);
+    return leadIds.map(id => ({ leadId: id, comment: "Error fetching comment", activityDate: "N/A" }));
+  }
+};
+
+
+
 export const generatePrompt = async () => {
   const crmData = await fetchCRMData();
   const todayDate = getCurrentDate();
   let crmDataYaml = yaml.dump(crmData);
 
-  const widths = {
-    name: 20,
-    company: 20,
-    stage: 15,
-    score: 10,
-    status: 10,
-    dealSize: 12,
-    lastContact: 12,
-    campaign: 25,
-    leadsGenerated: 18,
-    conversionRate: 18,
-    revenueImpact: 18,
-    source: 20,
-    totalLeads: 15,
-    qualifiedLeads: 18,
-    winRate: 12,
-  };
 
   const countryCounts = {};
   crmData.leads.forEach((lead) => {
@@ -85,21 +126,17 @@ export const generatePrompt = async () => {
 
   const campaignTable = Object.entries(campaignCounts)
   .map(([campaign, data]) => {
-    console.log("Data", data);
     const percentage =
       ((data.totalLeads / crmData.totalLeads) * 100).toFixed(2) + "%";
 
-    // Ensure data.totalLeads and data.oppValue are numbers
     const totalLeads = Number(data.totalLeads) || 0;
     const revenueImpact = Number(data.oppValue) || 0;
 
-    // Format totalLeads with comma and .00
     const formattedTotalLeads = totalLeads.toLocaleString("en-US", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
 
-    // Format revenue impact with comma and .00
     const formattedRevenueImpact = revenueImpact.toLocaleString("en-US", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
@@ -325,3 +362,106 @@ export const generatePrompt = async () => {
 
   return promptExample;
 };
+
+
+export const generatePromptDateWise = async () => {
+  const crmData = await fetchLatestLeadsByDate();
+  const todayDate = getCurrentDate();
+
+  const leadsWithComments = await Promise.all(
+    crmData.leads.map(async (lead) => {
+      const leadId = lead.leadId || null;
+      let commentWithDate = "N/A";
+
+      if (leadId) {
+        try {
+          const leadCommentData = await fetchLatestCommentActivity(leadId);
+          if (leadCommentData && leadCommentData.comment) {
+            commentWithDate = `${leadCommentData.comment} (${leadCommentData.activityDate || "N/A"})`;
+          }
+        } catch (error) {
+          console.error(`Error fetching comment for Lead ID ${leadId}:`, error);
+        }
+      }
+
+      return {
+        date: lead.date ? lead.date.split("T")[0] : "Unknown",
+        campaignName: lead.campaignName || "N/A",
+        leadName: lead.fullName || "N/A",
+        status: lead.status || "N/A",
+        stage: lead.stage || "N/A",
+        comment: lead.comment || "N/A", // Comment with activity timestamp
+      };
+    })
+  );
+
+  // Group leads by date
+  const dateGroups = {};
+  leadsWithComments.forEach((lead) => {
+    if (!dateGroups[lead.date]) {
+      dateGroups[lead.date] = [];
+    }
+    dateGroups[lead.date].push(lead);
+  });
+
+  // Generate Date-wise Table Rows
+  const dateTable = Object.entries(dateGroups)
+    .map(([date, leads]) =>
+      leads
+        .map(
+          (lead, index) => `
+          <tr>
+            ${index === 0 ? `<td rowspan="${leads.length}" style="padding: 8px; text-align: left;">${date}</td>` : ""}
+            <td style="padding: 8px; text-align: left;">${lead.campaignName}</td>
+            <td style="padding: 8px; text-align: left;">${lead.leadName}</td>
+            <td style="padding: 8px; text-align: left;">${lead.status}</td>
+            <td style="padding: 8px; text-align: left;">${lead.stage}</td>
+            <td style="padding: 8px; text-align: left;">${lead.comment}</td>
+          </tr>`
+        )
+        .join("")
+    )
+    .join("");
+
+  // Construct HTML
+  const emailHtml = `
+    <html>
+    <head>
+      <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+      <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Roboto', sans-serif; color: #000; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 8px; text-align: left; border: 1px solid #ddd; }
+        th { background-color: #f2f2f2; }
+        p { margin: 10px 0; }
+      </style>
+    </head>
+    <body>
+      <p><strong>Daily Lead Summary Report - ${todayDate} (Most Recent 25 Deals)</strong></p>
+      
+      <h3>Breakdown by Date</h3>
+      <table>
+        <tr>
+          <th>Date</th>
+          <th>Campaign Name</th>
+          <th>Lead Name</th>
+          <th>Status</th>
+          <th>Stage</th>
+          <th>Comment (Activity)</th>
+        </tr>
+        ${dateTable}
+      </table>
+
+      <p>Thank you,</p>
+      <p>SpiderX Sales AI</p>
+    </body>
+    </html>
+  `;
+
+  return emailHtml;
+};
+
+
+
+
