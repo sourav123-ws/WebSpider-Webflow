@@ -322,7 +322,7 @@ export const main = async () => {
   // console.log("promptForDateFilter",promptForDateFilter);
 
   sendMail(
-    "utsab.ghosh@webspiders.com",
+    "dipesh.majumder@webspiders.com",
     promptForDateFilter,
     subject,
     "sourav.bhattacherjee@webspiders.com"
@@ -340,5 +340,7 @@ export const main = async () => {
 cron.schedule("0 10,22 * * *", async () => {
   console.log("Running cron job at 10 AM and 10 PM...");
   await main();
+}, {
+  timezone: "Asia/Kolkata"
 });
 
