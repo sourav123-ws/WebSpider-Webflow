@@ -337,8 +337,8 @@ export const main = async () => {
   );
 };
 
-cron.schedule("*/1 * * * *", async () => {
-  console.log("Running cron job...");
+cron.schedule("0 10,22 * * *", async () => {
+  console.log("Running cron job at 10 AM and 10 PM...");
   await main();
 });
 
