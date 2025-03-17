@@ -330,10 +330,10 @@ export const main = async () => {
 
   // Sending second email
   sendMail(
-    "sourav.bhattacherjee@webspiders.com",
+    "dipesh.majumder@webspiders.com",
     prompt,
     subjectForDatePrompt,
-    "utsab.ghosh@webspiders.com"
+    "sourav.bhattacherjee@webspiders.com"
   );
 };
 
