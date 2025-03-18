@@ -3,9 +3,9 @@ import nodemailer from "nodemailer";
 import { generatePrompt , generatePromptDateWise, getCurrentDate } from "./prompt.js";
 import { completions } from "./openai.js";
 import { sendMail } from "./utils.js";
-import axios, { all } from "axios";
+import axios from "axios";
 import dotenv from "dotenv";
-import cron from "node-cron";
+import { getTimeOfDay } from "./utils.js";
 dotenv.config();
 
 const MONDAY_API_KEY = process.env.MONDAY_API_KEY;
@@ -230,6 +230,8 @@ export const fetchLatestLeadsByDate = async () => {
       hasMore = !!cursor;
     }
 
+    console.log("✅ Total Leads Fetched:", allItems.length);
+
     const structuredLeads = allItems.map((deal) => ({
       leadId: deal.id || "N/A", // Add Lead ID
       name: deal.column_values.find((col) => col.id === "name")?.text || "N/A",
@@ -263,19 +265,18 @@ export const fetchLatestLeadsByDate = async () => {
       date: deal.column_values.find((col) => col.id === "date_mkn218r2")?.text || "N/A",
     }));
     
-    
+    console.log("Fetched Leads:", structuredLeads);
 
-    // Sort by latest date and get last 25 leads
     const latestLeads = structuredLeads
       .filter((lead) => lead.date !== "N/A")
       .map((lead) => ({
         ...lead,
-        dateObj: new Date(lead.date), // Convert date string to Date object
+        dateObj: new Date(lead.date),
       }))
-      .sort((a, b) => b.dateObj - a.dateObj) // Sort by newest date
-      .slice(0, 25) // Get last 25 leads
+      .sort((a, b) => b.dateObj - a.dateObj)
+      .slice(0, 25)
       .map((lead) => {
-        delete lead.dateObj; // Remove date object before returning
+        delete lead.dateObj;
         return lead;
       });
 
@@ -311,18 +312,20 @@ export const fetchLatestLeadsByDate = async () => {
 
 
 
-
 export const main = async () => {
   const prompt = await generatePrompt();
   const promptForDateFilter = await generatePromptDateWise();
   const todayDate = getCurrentDate();
-  const subject = `Daily Deal Summary Report -  ${todayDate} (Top 25 Deals) - [Preview Mode]`
-  const subjectForDatePrompt = `Daily Lead Summary Report -  ${todayDate} (Recent 25 Leads) - [Preview Mode]`
+  const timeOfDay = getTimeOfDay();
+  const dealSubject = `Top 25 Deal Summary - ${todayDate} ${timeOfDay} Bulletin - [Preview Mode]`;
+  const leadSubject = `Top 25 Recent Leads Summary - ${todayDate} ${timeOfDay} Bulletin - [Preview Mode]`;
+  
+  console.log("promptForDateFilter",promptForDateFilter);
+  // console.log("prompt",prompt);
 
-  // console.log("promptForDateFilter",promptForDateFilter);
 
   sendMail(
-    "dipesh.majumder@webspiders.com",
+    "utsab.ghosh@webspiders.com",
     promptForDateFilter,
     subject,
     "sourav.bhattacherjee@webspiders.com"
@@ -331,8 +334,8 @@ export const main = async () => {
   // Sending second email
   sendMail(
     "dipesh.majumder@webspiders.com",
-    prompt,
-    subjectForDatePrompt,
+    promptForDateFilter,
+    leadSubject,
     "sourav.bhattacherjee@webspiders.com"
   );
 };
@@ -340,7 +343,5 @@ export const main = async () => {
 cron.schedule("0 10,22 * * *", async () => {
   console.log("Running cron job at 10 AM and 10 PM...");
   await main();
-}, {
-  timezone: "Asia/Kolkata"
 });
 
