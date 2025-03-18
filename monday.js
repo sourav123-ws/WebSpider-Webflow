@@ -597,16 +597,16 @@ export const main = async () => {
 
   // Sending the first email
   sendMail(
-    "utsab.ghosh@webspiders.com",
-    promptForDateFilter,
+    "dipesh.majumder@webspiders.com",
+    prompt,
     subject,
     "sourav.bhattacherjee@webspiders.com"
   );
 
   // Sending the second email
   sendMail(
-    "sourav.bhattacherjee@webspiders.com",
-    prompt,
+    "dipesh.majumder@webspiders.com",
+    promptForDateFilter,
     subjectForDatePrompt,
     "utsab.ghosh@webspiders.com"
   );
