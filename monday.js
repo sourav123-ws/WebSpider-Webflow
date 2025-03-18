@@ -1,6 +1,10 @@
 import fs from "fs";
 import nodemailer from "nodemailer";
-import { generatePrompt , generatePromptDateWise, getCurrentDate } from "./prompt.js";
+import {
+  generatePrompt,
+  generatePromptDateWise,
+  getCurrentDate,
+} from "./prompt.js";
 import { completions } from "./openai.js";
 import { sendMail } from "./utils.js";
 import axios from "axios";
@@ -10,7 +14,7 @@ dotenv.config();
 
 const MONDAY_API_KEY = process.env.MONDAY_API_KEY;
 const BOARD_ID = 1944965797;
-const LEAD_BOARD_ID = 1964391477 ; 
+const LEAD_BOARD_ID = 1964391477;
 
 export const fetchCRMData = async () => {
   let allItems = [];
@@ -182,15 +186,203 @@ export const fetchCRMData = async () => {
   }
 };
 
-//using date 
+//using date
+
+// export const fetchLatestLeadsByDate = async () => {
+//   let allItems = [];
+//   let cursor = null;
+//   let hasMore = true;
+
+//   try {
+//     while (hasMore) {
+//       const query = `
+//         query {
+//           boards(ids: ${LEAD_BOARD_ID}) {
+//             id
+//             name
+//             items_page (limit: 100, cursor: ${
+//               cursor ? `"${cursor}"` : "null"
+//             }) {
+//               cursor
+//               items {
+//                 id
+//                 name
+//                 column_values {
+//                   id
+//                   text
+//                 }
+//               }
+//             }
+//           }
+//         }
+//       `;
+
+//       const response = await axios.post(
+//         "https://api.monday.com/v2",
+//         { query },
+//         {
+//           headers: {
+//             Authorization: `Bearer ${MONDAY_API_KEY}`,
+//             "Content-Type": "application/json",
+//           },
+//         }
+//       );
+
+//       const items = response.data?.data?.boards?.[0]?.items_page?.items || [];
+//       allItems.push(...items);
+//       cursor = response.data?.data?.boards?.[0]?.items_page?.cursor;
+//       hasMore = !!cursor;
+//     }
+
+//     console.log("✅ Total Leads Fetched:", allItems.length);
+
+//     const structuredLeads = allItems.map((deal) => ({
+//       leadId: deal.id || "N/A", // Add Lead ID
+//       name: deal.column_values.find((col) => col.id === "name")?.text || "N/A",
+//       subitems:
+//         deal.column_values.find((col) => col.id === "subitems_mkmm2y67")
+//           ?.text || "N/A",
+//       person:
+//         deal.column_values.find((col) => col.id === "person")?.text || "N/A",
+//       status:
+//         deal.column_values.find((col) => col.id === "status")?.text || "N/A",
+//       stage:
+//         deal.column_values.find((col) => col.id === "color_mknahbh4")?.text ||
+//         "N/A",
+//       currency:
+//         deal.column_values.find((col) => col.id === "dropdown_mknkf8ae")
+//           ?.text || "N/A",
+//       dealsValue: parseFloat(
+//         deal.column_values
+//           .find((col) => col.id === "numeric_mknkp8zv")
+//           ?.text?.replace(/,/g, "") || 0
+//       ),
+//       leadScore:
+//         deal.column_values.find((col) => col.id === "numeric_mknst4ys")?.text ||
+//         "N/A",
+//       leadStage:
+//         deal.column_values.find((col) => col.id === "color_mkntbxq3")?.text ||
+//         "N/A",
+//       createdDate:
+//         deal.column_values.find((col) => col.id === "date_mknhjdhp")?.text ||
+//         "N/A",
+//       lastActivityDate:
+//         deal.column_values.find((col) => col.id === "date_1_mkn8hht7")?.text ||
+//         "N/A",
+//       activeStatus:
+//         deal.column_values.find((col) => col.id === "color_mkntydxy")?.text ||
+//         "N/A",
+//       leadOwner:
+//         deal.column_values.find((col) => col.id === "text_mknpz84t")?.text ||
+//         "N/A",
+//       platform:
+//         deal.column_values.find((col) => col.id === "text_mkn5ywg8")?.text ||
+//         "N/A",
+//       source:
+//         deal.column_values.find((col) => col.id === "dropdown_mkn5eq9j")
+//           ?.text || "N/A",
+//       comment:
+//         deal.column_values.find((col) => col.id === "text_mkmqmm97")?.text ||
+//         "N/A",
+//       fullName:
+//         deal.column_values.find((col) => col.id === "full_name_mkn55xfz")
+//           ?.text || "N/A",
+//       email:
+//         deal.column_values.find((col) => col.id === "email_mkmmdycm")?.text ||
+//         "N/A",
+//       phone:
+//         deal.column_values.find((col) => col.id === "phone_mkmm91gk")?.text ||
+//         "N/A",
+//       company:
+//         deal.column_values.find((col) => col.id === "text_mkmm2dhd")?.text ||
+//         "N/A",
+//       agentOffering:
+//         deal.column_values.find((col) => col.id === "dropdown_mkmmhxtw")
+//           ?.text || "N/A",
+//       country:
+//         deal.column_values.find((col) => col.id === "country_mkmpz8yr")?.text ||
+//         "N/A",
+//       campaignId:
+//         deal.column_values.find((col) => col.id === "agent_name_mkmphvgg")
+//           ?.text || "N/A",
+//       campaignName:
+//         deal.column_values.find((col) => col.id === "campaign_name_mkmpevbs")
+//           ?.text || "N/A",
+//       formName:
+//         deal.column_values.find((col) => col.id === "text_mkn1rc24")?.text ||
+//         "N/A",
+//       jobDescription:
+//         deal.column_values.find((col) => col.id === "designation_mkmpjymv")
+//           ?.text || "N/A",
+//       dealClosingPercentage:
+//         deal.column_values.find((col) => col.id === "text_mkmq77bw")?.text ||
+//         "N/A",
+//       linkedin:
+//         deal.column_values.find((col) => col.id === "linkedin_mkmpnvnp")
+//           ?.text || "N/A",
+//       date:
+//         deal.column_values.find((col) => col.id === "date_mkn218r2")?.text ||
+//         "N/A",
+//     }));
+
+//     console.log("Fetched Leads:", structuredLeads);
+    
+
+//     const latestLeads = structuredLeads
+//       .filter(
+//         (lead) => lead.createdDate && !isNaN(Date.parse(lead.createdDate))
+//       ) // Ensure createdDate exists and is valid
+//       .map((lead) => ({
+//         ...lead,
+//         dateObj: new Date(lead.createdDate), // Convert createdDate to Date object
+//       }))
+//       .sort((a, b) => b.dateObj - a.dateObj)
+//       .slice(0, 25)
+//       .map((lead) => {
+//         delete lead.dateObj; // Remove temporary dateObj property
+//         return lead;
+//       });
+
+//     return {
+//       totalLeads: latestLeads.length,
+//       qualifiedLeads: latestLeads.filter((item) => item.status === "Qualified")
+//         .length,
+//       leads: latestLeads,
+//       leadSources: latestLeads.map((deal) => deal.source),
+//       campaigns: latestLeads.map((deal) => deal.campaignName),
+//       countries: latestLeads.map((deal) => deal.country),
+//       aiInsights: [],
+//       priorityLeads: latestLeads.map((deal) => deal.name),
+//     };
+//   } catch (error) {
+//     console.error(
+//       "❌ Error fetching latest leads by date:",
+//       JSON.stringify(error.response?.data || error.message, null, 2)
+//     );
+//     return {
+//       totalLeads: 0,
+//       qualifiedLeads: 0,
+//       leads: [],
+//       leadSources: [],
+//       campaigns: [],
+//       countries: [],
+//       aiInsights: [],
+//       priorityLeads: [],
+//     };
+//   }
+// };
 
 export const fetchLatestLeadsByDate = async () => {
   let allItems = [];
   let cursor = null;
   let hasMore = true;
 
+  console.log("🔄 Fetching leads from Monday.com...");
+
   try {
     while (hasMore) {
+      console.log(`🔍 Fetching batch with cursor: ${cursor || "null"}`);
+
       const query = `
         query {
           boards(ids: ${LEAD_BOARD_ID}) {
@@ -225,6 +417,8 @@ export const fetchLatestLeadsByDate = async () => {
       );
 
       const items = response.data?.data?.boards?.[0]?.items_page?.items || [];
+      console.log(`📦 Retrieved ${items.length} items in this batch`);
+
       allItems.push(...items);
       cursor = response.data?.data?.boards?.[0]?.items_page?.cursor;
       hasMore = !!cursor;
@@ -232,46 +426,112 @@ export const fetchLatestLeadsByDate = async () => {
 
     console.log("✅ Total Leads Fetched:", allItems.length);
 
-    const structuredLeads = allItems.map((deal) => ({
-      leadId: deal.id || "N/A", // Add Lead ID
-      name: deal.column_values.find((col) => col.id === "name")?.text || "N/A",
-      subitems: deal.column_values.find((col) => col.id === "subitems_mkmm2y67")?.text || "N/A",
-      person: deal.column_values.find((col) => col.id === "person")?.text || "N/A",
-      status: deal.column_values.find((col) => col.id === "status")?.text || "N/A",
-      stage: deal.column_values.find((col) => col.id === "color_mknahbh4")?.text || "N/A",
-      currency: deal.column_values.find((col) => col.id === "dropdown_mknkf8ae")?.text || "N/A",
-      dealsValue: parseFloat(deal.column_values.find((col) => col.id === "numeric_mknkp8zv")?.text?.replace(/,/g, "") || 0),
-      leadScore: deal.column_values.find((col) => col.id === "numeric_mknst4ys")?.text || "N/A",
-      leadStage: deal.column_values.find((col) => col.id === "color_mkntbxq3")?.text || "N/A",
-      createdDate: deal.column_values.find((col) => col.id === "date_mknhjdhp")?.text || "N/A",
-      lastActivityDate: deal.column_values.find((col) => col.id === "date_1_mkn8hht7")?.text || "N/A",
-      activeStatus: deal.column_values.find((col) => col.id === "color_mkntydxy")?.text || "N/A",
-      leadOwner: deal.column_values.find((col) => col.id === "text_mknpz84t")?.text || "N/A",
-      platform: deal.column_values.find((col) => col.id === "text_mkn5ywg8")?.text || "N/A",
-      source: deal.column_values.find((col) => col.id === "dropdown_mkn5eq9j")?.text || "N/A",
-      comment: deal.column_values.find((col) => col.id === "text_mkmqmm97")?.text || "N/A",
-      fullName: deal.column_values.find((col) => col.id === "full_name_mkn55xfz")?.text || "N/A",
-      email: deal.column_values.find((col) => col.id === "email_mkmmdycm")?.text || "N/A",
-      phone: deal.column_values.find((col) => col.id === "phone_mkmm91gk")?.text || "N/A",
-      company: deal.column_values.find((col) => col.id === "text_mkmm2dhd")?.text || "N/A",
-      agentOffering: deal.column_values.find((col) => col.id === "dropdown_mkmmhxtw")?.text || "N/A",
-      country: deal.column_values.find((col) => col.id === "country_mkmpz8yr")?.text || "N/A",
-      campaignId: deal.column_values.find((col) => col.id === "agent_name_mkmphvgg")?.text || "N/A",
-      campaignName: deal.column_values.find((col) => col.id === "campaign_name_mkmpevbs")?.text || "N/A",
-      formName: deal.column_values.find((col) => col.id === "text_mkn1rc24")?.text || "N/A",
-      jobDescription: deal.column_values.find((col) => col.id === "designation_mkmpjymv")?.text || "N/A",
-      dealClosingPercentage: deal.column_values.find((col) => col.id === "text_mkmq77bw")?.text || "N/A",
-      linkedin: deal.column_values.find((col) => col.id === "linkedin_mkmpnvnp")?.text || "N/A",
-      date: deal.column_values.find((col) => col.id === "date_mkn218r2")?.text || "N/A",
-    }));
-    
-    console.log("Fetched Leads:", structuredLeads);
+    const structuredLeads = allItems.map((deal) => {
+      const createdDate =
+        deal.column_values.find((col) => col.id === "date_mknhjdhp")?.text ||
+        "N/A";
+      const fallbackDate =
+        deal.column_values.find((col) => col.id === "date_mkn218r2")?.text ||
+        "N/A";
+
+      const finalDate = createdDate !== "N/A" ? createdDate : fallbackDate;
+      
+
+      return {
+        leadId: deal.id || "N/A",
+        name: deal.column_values.find((col) => col.id === "name")?.text || "N/A",
+        subitems:
+          deal.column_values.find((col) => col.id === "subitems_mkmm2y67")
+            ?.text || "N/A",
+        person:
+          deal.column_values.find((col) => col.id === "person")?.text || "N/A",
+        status:
+          deal.column_values.find((col) => col.id === "status")?.text || "N/A",
+        stage:
+          deal.column_values.find((col) => col.id === "color_mknahbh4")?.text ||
+          "N/A",
+        currency:
+          deal.column_values.find((col) => col.id === "dropdown_mknkf8ae")
+            ?.text || "N/A",
+        dealsValue: parseFloat(
+          deal.column_values
+            .find((col) => col.id === "numeric_mknkp8zv")
+            ?.text?.replace(/,/g, "") || 0
+        ),
+        leadScore:
+          deal.column_values.find((col) => col.id === "numeric_mknst4ys")
+            ?.text || "N/A",
+        leadStage:
+          deal.column_values.find((col) => col.id === "color_mkntbxq3")?.text ||
+          "N/A",
+        createdDate: finalDate,
+        lastActivityDate:
+          deal.column_values.find((col) => col.id === "date_1_mkn8hht7")
+            ?.text || "N/A",
+        activeStatus:
+          deal.column_values.find((col) => col.id === "color_mkntydxy")?.text ||
+          "N/A",
+        leadOwner:
+          deal.column_values.find((col) => col.id === "text_mknpz84t")?.text ||
+          "N/A",
+        platform:
+          deal.column_values.find((col) => col.id === "text_mkn5ywg8")?.text ||
+          "N/A",
+        source:
+          deal.column_values.find((col) => col.id === "dropdown_mkn5eq9j")
+            ?.text || "N/A",
+        comment:
+          deal.column_values.find((col) => col.id === "text_mkmqmm97")?.text ||
+          "N/A",
+        fullName:
+          deal.column_values.find((col) => col.id === "full_name_mkn55xfz")
+            ?.text || "N/A",
+        email:
+          deal.column_values.find((col) => col.id === "email_mkmmdycm")?.text ||
+          "N/A",
+        phone:
+          deal.column_values.find((col) => col.id === "phone_mkmm91gk")?.text ||
+          "N/A",
+        company:
+          deal.column_values.find((col) => col.id === "text_mkmm2dhd")?.text ||
+          "N/A",
+        agentOffering:
+          deal.column_values.find((col) => col.id === "dropdown_mkmmhxtw")
+            ?.text || "N/A",
+        country:
+          deal.column_values.find((col) => col.id === "country_mkmpz8yr")?.text ||
+          "N/A",
+        campaignId:
+          deal.column_values.find((col) => col.id === "agent_name_mkmphvgg")
+            ?.text || "N/A",
+        campaignName:
+          deal.column_values.find((col) => col.id === "campaign_name_mkmpevbs")
+            ?.text || "N/A",
+        formName:
+          deal.column_values.find((col) => col.id === "text_mkn1rc24")?.text ||
+          "N/A",
+        jobDescription:
+          deal.column_values.find((col) => col.id === "designation_mkmpjymv")
+            ?.text || "N/A",
+        dealClosingPercentage:
+          deal.column_values.find((col) => col.id === "text_mkmq77bw")?.text ||
+          "N/A",
+        linkedin:
+          deal.column_values.find((col) => col.id === "linkedin_mkmpnvnp")
+            ?.text || "N/A",
+        date: fallbackDate,
+      };
+    });
+
+    console.log("✅ Structured Leads:", structuredLeads);
 
     const latestLeads = structuredLeads
-      .filter((lead) => lead.date !== "N/A")
+      .filter(
+        (lead) => lead.createdDate && !isNaN(Date.parse(lead.createdDate))
+      )
       .map((lead) => ({
         ...lead,
-        dateObj: new Date(lead.date),
+        dateObj: new Date(lead.createdDate),
       }))
       .sort((a, b) => b.dateObj - a.dateObj)
       .slice(0, 25)
@@ -280,11 +540,12 @@ export const fetchLatestLeadsByDate = async () => {
         return lead;
       });
 
+    console.log("🎯 Final Sorted Leads:", latestLeads);
+
     return {
       totalLeads: latestLeads.length,
-      qualifiedLeads: latestLeads.filter(
-        (item) => item.status === "Qualified"
-      ).length,
+      qualifiedLeads: latestLeads.filter((item) => item.status === "Qualified")
+        .length,
       leads: latestLeads,
       leadSources: latestLeads.map((deal) => deal.source),
       campaigns: latestLeads.map((deal) => deal.campaignName),
@@ -311,7 +572,6 @@ export const fetchLatestLeadsByDate = async () => {
 };
 
 
-
 export const main = async () => {
   const prompt = await generatePrompt();
   const promptForDateFilter = await generatePromptDateWise();
@@ -319,15 +579,14 @@ export const main = async () => {
   const timeOfDay = getTimeOfDay();
   const dealSubject = `Top 25 Deal Summary - ${todayDate} ${timeOfDay} Bulletin - [Preview Mode]`;
   const leadSubject = `Top 25 Recent Leads Summary - ${todayDate} ${timeOfDay} Bulletin - [Preview Mode]`;
-  
-  console.log("promptForDateFilter",promptForDateFilter);
-  // console.log("prompt",prompt);
 
+  // console.log("promptForDateFilter", promptForDateFilter);
+  console.log("prompt",prompt);
 
   sendMail(
-    "utsab.ghosh@webspiders.com",
-    promptForDateFilter,
-    subject,
+    "dipesh.majumder@webspiders.com",
+    prompt,
+    dealSubject,
     "sourav.bhattacherjee@webspiders.com"
   );
 
@@ -339,9 +598,3 @@ export const main = async () => {
     "sourav.bhattacherjee@webspiders.com"
   );
 };
-
-cron.schedule("0 10,22 * * *", async () => {
-  console.log("Running cron job at 10 AM and 10 PM...");
-  await main();
-});
-
