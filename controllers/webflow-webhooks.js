@@ -7,7 +7,8 @@ const MONDAY_API_KEY = process.env.MONDAY_API_KEY;
 
 const BOARD_ID = process.env.BOARD_ID;
 const GROUP_ID = process.env.GROUP_ID;
-const RECRUITMENT_BOARD_ID = process.env.RECRUITMENT_BOARD_ID;
+const RECRUITMENT_BOARD_ID = "1985428531"
+const PRATAM_GROUP_ID = "group_mkp4wtg0"
 
 
 if (!MONDAY_API_KEY || !BOARD_ID || !GROUP_ID) {
@@ -59,6 +60,7 @@ export const webflowWebhooks = async (req, res) => {
   console.log(`📌 Form Submitted: ${formName}`);
 
   const mappedData = mapWebflowFields(formName, formData, submittedAt);
+  console.log("Mapped Data",mappedData);
 
   const columnValues = {
     date4: mappedData.date,
@@ -107,10 +109,64 @@ export const webflowWebhooks = async (req, res) => {
   }
 };
 
-export const getRecruitmentDetails = async()=>{
+export const getRecruitmentDetails = async (req, res) => {
   try {
-    
+    const formData = req.body.payload.data;
+
+    const columnValues = {
+      "text_mkp06g1n": formData.Name || "", // Name
+      "email_mkp0w299": { "email": formData.Email, "text": formData.Email } || "", // Email
+      "numeric_mkp0j2f7": formData.Phone || "", // Phone No
+      "text_mkp0n7ee": formData.JobTitle || "", // Highest Qualification
+      "text_mkp01p06": formData.Resume || "", // Resume (URL)
+      "text_mkp0sqh0": "", // Github
+      "text_mkp0fmgq": "", // Portfolio
+      "text_mkp0dym0": "", // Technology
+      "text_mkp09aav": formData.Company || "", // College Name
+      "text_mkp0rre7": formData.CurrentLocation || "", // Location
+      "text_mkp0rydz": formData.PreferredLocation === "Kolkata" ? "Yes" : "No" // Willing to relocate
+    };
+
+    const mutation = `
+    mutation {
+      create_item (
+        board_id: ${RECRUITMENT_BOARD_ID},
+        group_id: "${PRATAM_GROUP_ID}",
+        item_name: "${formData.Name}",
+        column_values: "${JSON.stringify(columnValues).replace(/"/g, '\\"')}"
+      ) {
+        id
+      }
+    }`;
+
+    fetch("https://api.monday.com/v2", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": process.env.MONDAY_API_KEY
+      },
+      body: JSON.stringify({
+        query: mutation
+      })
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.errors) {
+          console.error("Monday API Errors:", data.errors);
+          res.status(400).json({ error: "Monday API error", details: data.errors });
+        } else {
+          console.log("Monday API Response:", data);
+          res.status(200).json({ success: true, itemId: data.data.create_item.id });
+        }
+      })
+      .catch(error => {
+        console.error("Fetch error:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+      });
+
   } catch (error) {
-    
+    console.error("Error sending data to Monday.com:", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
   }
-}
+};
+

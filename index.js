@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 import { main } from "./monday.js";
 import { managerScoreValue, mondayWebhooks } from "./controllers/monday-webhooks.js";
 import { getRecruitmentDetails, webflowWebhooks } from "./controllers/webflow-webhooks.js";
-
+import cron from "node-cron";
 dotenv.config();
 
 const app = express();
@@ -32,7 +32,12 @@ app.post("/get-recruitment-details",getRecruitmentDetails)
 app.post("/manage-score-value",managerScoreValue);
 
 
-main();
+// cron.schedule("0 10,22 * * *", async () => {
+//   console.log("Running cron job at 10 AM and 10 PM...");
+//   await main();
+// });
+
+// main();
 
 
 app.listen(PORT, "0.0.0.0", () => {

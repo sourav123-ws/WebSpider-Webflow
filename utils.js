@@ -26,3 +26,10 @@ export const sendMail=async(toEmail, body, subject, ccEmail = '')=>{
         console.error('❌ Error sending email:', error);
     }
 }
+
+
+export const getTimeOfDay=()=>{
+    const hours = new Date().getHours();
+    return hours < 12 ? "Morning" : "Evening";
+  }
+  
