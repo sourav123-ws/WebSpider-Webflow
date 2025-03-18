@@ -576,25 +576,39 @@ export const main = async () => {
   const prompt = await generatePrompt();
   const promptForDateFilter = await generatePromptDateWise();
   const todayDate = getCurrentDate();
-  const timeOfDay = getTimeOfDay();
-  const dealSubject = `Top 25 Deal Summary - ${todayDate} ${timeOfDay} Bulletin - [Preview Mode]`;
-  const leadSubject = `Top 25 Recent Leads Summary - ${todayDate} ${timeOfDay} Bulletin - [Preview Mode]`;
+  
+  const currentHour = new Date().getHours();
 
-  // console.log("promptForDateFilter", promptForDateFilter);
-  console.log("prompt",prompt);
+  let subject;
+  if (currentHour < 12) {
+    subject = `Top 25 Deal Summary - ${todayDate} Morning Bulletin - [Preview Mode]`;
+  } else {
+    subject = `Top 25 Deal Summary - ${todayDate} Evening Bulletin - [Preview Mode]`;
+  }
 
+  let subjectForDatePrompt;
+  if (currentHour < 12) {
+    // Morning: Before 12 PM
+    subjectForDatePrompt = `Top 25 Recent Leads Summary - ${todayDate} Morning Bulletin - [Preview Mode]`;
+  } else {
+    // Evening: After 12 PM
+    subjectForDatePrompt = `Top 25 Recent Leads Summary - ${todayDate} Evening Bulletin - [Preview Mode]`;
+  }
+
+  // Sending the first email
   sendMail(
-    "dipesh.majumder@webspiders.com",
-    prompt,
-    dealSubject,
+    "utsab.ghosh@webspiders.com",
+    promptForDateFilter,
+    subject,
     "sourav.bhattacherjee@webspiders.com"
   );
 
-  // Sending second email
+  // Sending the second email
   sendMail(
-    "dipesh.majumder@webspiders.com",
-    promptForDateFilter,
-    leadSubject,
-    "sourav.bhattacherjee@webspiders.com"
+    "sourav.bhattacherjee@webspiders.com",
+    prompt,
+    subjectForDatePrompt,
+    "utsab.ghosh@webspiders.com"
   );
 };
+
