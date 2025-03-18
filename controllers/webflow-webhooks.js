@@ -110,23 +110,29 @@ export const webflowWebhooks = async (req, res) => {
 };
 
 export const getRecruitmentDetails = async (req, res) => {
+  console.log("HERE");
   try {
     const formData = req.body.payload.data;
+    console.log("FROM DATA",formData);
+    if (formData.JobTitle !== "Pratham 2.0 - An Exclusive Fresh Tech Talent Hiring Program") {
+      return res.status(200).json({ message: "Form name does not match, no action taken." });
+    }
 
     const columnValues = {
       "text_mkp06g1n": formData.Name || "", // Name
       "email_mkp0w299": { "email": formData.Email, "text": formData.Email } || "", // Email
-      "numeric_mkp0j2f7": formData.Phone || "", // Phone No
-      "text_mkp0n7ee": formData.JobTitle || "", // Highest Qualification
-      "text_mkp01p06": formData.Resume || "", // Resume (URL)
-      "text_mkp0sqh0": "", // Github
-      "text_mkp0fmgq": "", // Portfolio
-      "text_mkp0dym0": "", // Technology
-      "text_mkp09aav": formData.Company || "", // College Name
-      "text_mkp0rre7": formData.CurrentLocation || "", // Location
-      "text_mkp0rydz": formData.PreferredLocation === "Kolkata" ? "Yes" : "No" // Willing to relocate
+      "text_mkp5zamf":`${formData["Dial code"]}${formData.Phone}`,
+      // "numeric_mkp0j2f7": `${formData["Dial code"]} ${formData.Phone || ""}`,
+      "text_mkp01p06": formData.Resume || "",
+      "text_mkp0rre7": formData.CurrentLocation || "",
+      "text_mkp0rydz": formData.PreferredLocation === "Kolkata" ? "Yes" : "No", // Willing to relocate
+      "text_mkp58z25": formData.PreferredLocation || "",
+      "text_mkp5q2c3": formData.CurrentCTC || "",
+      "text_mkp5rvwx": formData.ExpectedCTC || "",
+      "text_mkp5qvz4": formData.NoticePeriod || "",
+      "text_mkp5kmdy": formData.Company || "" 
     };
-
+    console.log("Column Values",columnValues.numeric_mkp0j2f7);
     const mutation = `
     mutation {
       create_item (

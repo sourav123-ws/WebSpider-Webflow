@@ -32,12 +32,10 @@ app.post("/get-recruitment-details",getRecruitmentDetails)
 app.post("/manage-score-value",managerScoreValue);
 
 
-// cron.schedule("0 10,22 * * *", async () => {
-//   console.log("Running cron job at 10 AM and 10 PM...");
-//   await main();
-// });
-
-// main();
+cron.schedule("0 9,21 * * *", async () => {
+  console.log("Running cron job at 9 AM and 9 PM...");
+  await main();
+});
 
 
 app.listen(PORT, "0.0.0.0", () => {
