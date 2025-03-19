@@ -64,6 +64,19 @@ export const fetchCRMData = async () => {
 
     console.log(`✅ Fetched ${allItems.length} items from board ${BOARD_ID}`);
 
+
+    const excludedSources = [
+      "Tender",
+      "Order Forms",
+      "Renewal",
+      "Client Referral",
+      "Tradeshow",
+      "Website Enquiry",
+      "CU Partnership",
+      "Webinar",
+    ];
+
+
     let structuredLeads = allItems.map((deal) => ({
       name:
         deal.column_values.find((col) => col.id === "client_name_mkmx5s30")
@@ -81,7 +94,7 @@ export const fetchCRMData = async () => {
         deal.column_values.find((col) => col.id === "numeric_mknseckr")?.text ||
         "N/A",
       status:
-        deal.column_values.find((col) => col.id === "color_mknt1t1j")?.text ||
+        deal.column_values.find((col) => col.id === "color_mknbte2j")?.text ||
         "N/A",
       date:
         deal.column_values.find((col) => col.id === "date_mknjmf73")?.text ||
@@ -114,7 +127,7 @@ export const fetchCRMData = async () => {
         "N/A",
       campaignName:
         deal.column_values.find((col) => col.id === "text_mkncshyb")?.text ||
-        "N/A",
+        "Others - Website Organic, Calendly",
       country:
         deal.column_values.find((col) => col.id === "country_mknzs6a9")?.text ||
         "N/A",
@@ -149,6 +162,10 @@ export const fetchCRMData = async () => {
         deal.column_values.find((col) => col.id === "date_mkna3qt1")?.text ||
         "N/A",
     }));
+
+    structuredLeads = structuredLeads.filter(
+      (lead) => !excludedSources.includes(lead.sourceOfOpportunity)
+    );
 
     structuredLeads = structuredLeads
       .sort((a, b) => b.oppValue - a.oppValue)
@@ -540,7 +557,7 @@ export const fetchLatestLeadsByDate = async () => {
         return lead;
       });
 
-    console.log("🎯 Final Sorted Leads:", latestLeads);
+    // console.log("🎯 Final Sorted Leads:", latestLeads);
 
     return {
       totalLeads: latestLeads.length,
@@ -581,37 +598,37 @@ export const main = async () => {
 
   let subject;
   if (currentHour < 12) {
-    subject = `Top 25 Deal Summary - ${todayDate} Morning Bulletin - [Preview Mode]`;
+    subject = `Top 25 Deals(SpiderX.AI) Summary - ${todayDate} Morning Bulletin - [Preview Mode]`;
   } else {
-    subject = `Top 25 Deal Summary - ${todayDate} Evening Bulletin - [Preview Mode]`;
+    subject = `Recent 25 Lead Summary - ${todayDate} Evening Bulletin - [Preview Mode]`;
   }
 
   let subjectForDatePrompt;
   if (currentHour < 12) {
     // Morning: Before 12 PM
-    subjectForDatePrompt = `Top 25 Recent Leads Summary - ${todayDate} Morning Bulletin - [Preview Mode]`;
+    subjectForDatePrompt = `Top 25 Deals(SpiderX.AI) Summary - ${todayDate} Morning Bulletin - [Preview Mode]`;
   } else {
     // Evening: After 12 PM
-    subjectForDatePrompt = `Top 25 Recent Leads Summary - ${todayDate} Evening Bulletin - [Preview Mode]`;
+    subjectForDatePrompt = `Recent 25 Lead Summary - ${todayDate} Evening Bulletin - [Preview Mode]`;
   }
 
-  console.log("PROMPT",prompt);
+  // console.log("PROMPT",prompt);
   // console.log("promptForDateFilter",promptForDateFilter);
 
   // Sending the first email
-  // sendMail(
-  //   "dipesh.majumder@webspiders.com",
-  //   prompt,
-  //   subject,
-  //   "sourav.bhattacherjee@webspiders.com"
-  // );
+  sendMail(
+    "dipesh.majumder@webspiders.com",
+    prompt,
+    subject,
+    "sourav.bhattacherjee@webspiders.com"
+  );
 
   // // // Sending the second email
-  // sendMail(
-  //   "dipesh.majumder@webspiders.com",
-  //   promptForDateFilter,
-  //   subjectForDatePrompt,
-  //   "sourav.bhattacherjee@webspiders.com"
-  // );
+  sendMail(
+    "dipesh.majumder@webspiders.com",
+    promptForDateFilter,
+    subjectForDatePrompt,
+    "sourav.bhattacherjee@webspiders.com"
+  );
 };
 
