@@ -524,6 +524,7 @@ export const fetchLatestCommentsForLeads = async (leadIds) => {
 
 export const generatePrompt = async () => {
   const crmData = await fetchCRMData();
+  
   const todayDate = getCurrentDate();
   let crmDataYaml = yaml.dump(crmData);
 
@@ -562,7 +563,7 @@ export const generatePrompt = async () => {
 
   const campaignCounts = {};
   crmData.leads.forEach((lead) => {
-    console.log("Lead", lead);
+    // console.log("Lead", lead);
     const campaign = lead.campaignName || "Unknown";
     if (!campaignCounts[campaign])
       campaignCounts[campaign] = {
@@ -624,6 +625,7 @@ export const generatePrompt = async () => {
   const detailedLeadsTable = crmData.leads
     .map((lead) => {
       // Determine the status class
+      console.log("LEAD",lead);
       let statusClass = "";
       if (lead.status === "Cold") statusClass = "cold";
       else if (lead.status === "Hot") statusClass = "hot";
@@ -806,7 +808,7 @@ tr:hover td {
       <tr>
         <td>Total Leads in Pipeline</td>
         <td>${crmData.totalLeads || "N/A"}</td>
-        <td><td>${formattedTotalDealSize}</td></td>
+        <td>${formattedTotalDealSize}</td>
       </tr>
     </table>
   
@@ -915,7 +917,7 @@ export const generatePromptDateWise = async () => {
     dateGroups[lead.date].push(lead);
   });
 
-  console.log("Date Groups",dateGroups);
+  // console.log("Date Groups",dateGroups);
 
   // Generate Date-wise Table Rows
   const dateTable = Object.entries(dateGroups)

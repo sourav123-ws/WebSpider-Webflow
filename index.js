@@ -41,7 +41,7 @@ app.post("/manage-score-value",managerScoreValue);
 //   }
 // });
 
-main();
+// main();
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Webhook listening on port ${PORT}`);
