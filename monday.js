@@ -616,19 +616,19 @@ export const main = async () => {
   // console.log("promptForDateFilter",promptForDateFilter);
 
   // Sending the first email
-  sendMail(
-    "dipesh.majumder@webspiders.com",
-    prompt,
-    subject,
-    "sourav.bhattacherjee@webspiders.com"
-  );
+  // sendMail(
+  //   "dipesh.majumder@webspiders.com",
+  //   prompt,
+  //   subject,
+  //   "sourav.bhattacherjee@webspiders.com"
+  // );
 
   // // // Sending the second email
-  sendMail(
-    "dipesh.majumder@webspiders.com",
-    promptForDateFilter,
-    subjectForDatePrompt,
-    "sourav.bhattacherjee@webspiders.com"
-  );
+  // sendMail(
+  //   "dipesh.majumder@webspiders.com",
+  //   promptForDateFilter,
+  //   subjectForDatePrompt,
+  //   "sourav.bhattacherjee@webspiders.com"
+  // );
 };
 
