@@ -1,0 +1,412 @@
+<html>
+  <head>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: 'Roboto', sans-serif;
+        color: #333;
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        padding: 20px;
+        font-size: 14px;
+      }
+      h3 {
+        margin-top: 20px;
+        margin-bottom: 10px;
+        color: #007bff;
+        font-weight: 700;
+        font-size: 18px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        border: 1px solid #ddd;
+        overflow: hidden;
+      }
+      th, td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+        font-size: 14px;
+      }
+      th {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        text-transform: uppercase;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+      }
+      tr:nth-child(even) {
+        background-color: #f9f9f9;
+      }
+      tr:hover {
+  background-color: #f1f1f1;
+  transition: background-color 0.3s ease;
+}
+
+tr:hover td {
+  color: #333;
+}
+      .summary-table {
+        width: 40%;
+        margin-left: auto;
+        background: linear-gradient(135deg, #343a40, #212529);
+        color: white;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+      .summary-table td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        font-weight: bold;
+        font-size: 14px;
+      }
+      p {
+        margin-bottom: 10px;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      /* Status colors with animations */
+      .cold {
+        background-color: #007bff !important;
+        color: white;
+        font-weight: bold;
+        animation: pulseCold 1.5s infinite;
+      }
+      .warm {
+        background-color: #ffc107 !important;
+        color: black;
+        font-weight: bold;
+        animation: pulseWarm 1.5s infinite;
+      }
+      .hot {
+        background-color: #dc3545 !important;
+        color: white;
+        font-weight: bold;
+        animation: pulseHot 1.5s infinite;
+      }
+      .na {
+        background-color: #6c757d !important; /* Gray for N/A */
+        color: white;
+        font-weight: bold;
+        animation: pulseNA 1.5s infinite;
+      }
+      @keyframes pulseCold {
+        0% { background-color: #007bff; }
+        50% { background-color: #0056b3; }
+        100% { background-color: #007bff; }
+      }
+      @keyframes pulseWarm {
+        0% { background-color: #ffc107; }
+        50% { background-color: #e0a800; }
+        100% { background-color: #ffc107; }
+      }
+      @keyframes pulseHot {
+        0% { background-color: #dc3545; }
+        50% { background-color: #a71d2a; }
+        100% { background-color: #dc3545; }
+      }
+      @keyframes pulseNA {
+        0% { background-color: #6c757d; }
+        50% { background-color: #495057; }
+        100% { background-color: #6c757d; }
+      }
+    </style>
+  </head>
+  <body>
+    <p>Hello,</p>
+    <p>Below is the CRM daily lead summary report to support decision-making on closing leads.</p>
+  
+    <h3>Overall Pipeline Metrics</h3>
+    <table>
+      <tr>
+        <th>Metric</th>
+        <th>Value</th>
+        <th>Total Deal Value($)</th>
+      </tr>
+      <tr>
+        <td>Total Leads in Pipeline</td>
+        <td>25</td>
+        <td><td>$5,019,971.94</td></td>
+      </tr>
+    </table>
+  
+    <h3>Detailed Lead Information</h3>
+    <table>
+      <tr>
+        <th>Lead Name</th>
+        <th>Company</th>
+        <th>Stage</th>
+        <th>Status</th>
+        <th>Deal Size ($)</th>
+      </tr>
+      <tr>
+          <td style="padding: 12px; text-align: left;">N/A</td>
+          <td style="padding: 12px; text-align: left;">People's Association</td>
+          <td style="padding: 12px; text-align: left;">Closed  Lost</td>
+          <td style="padding: 12px; text-align: left;" class="cold">Cold</td>
+          <td style="padding: 12px; text-align: left;">921,731.81</td>
+        </tr><tr>
+          <td style="padding: 12px; text-align: left;">N/A</td>
+          <td style="padding: 12px; text-align: left;">Gardens by the Bay</td>
+          <td style="padding: 12px; text-align: left;">Quote Given</td>
+          <td style="padding: 12px; text-align: left;" class="hot">Hot</td>
+          <td style="padding: 12px; text-align: left;">544,126.10</td>
+        </tr><tr>
+          <td style="padding: 12px; text-align: left;">N/A</td>
+          <td style="padding: 12px; text-align: left;">People's Association (NORTH WEST COMMUNITY DEVELOPMENT COUNCIL)</td>
+          <td style="padding: 12px; text-align: left;">Quote Given</td>
+          <td style="padding: 12px; text-align: left;" class="hot">Hot</td>
+          <td style="padding: 12px; text-align: left;">390,250.43</td>
+        </tr><tr>
+          <td style="padding: 12px; text-align: left;">N/A</td>
+          <td style="padding: 12px; text-align: left;">Peopleâs Association (PA)</td>
+          <td style="padding: 12px; text-align: left;">Quote Given</td>
+          <td style="padding: 12px; text-align: left;" class="hot">Hot</td>
+          <td style="padding: 12px; text-align: left;">325,846.79</td>
+        </tr><tr>
+          <td style="padding: 12px; text-align: left;">N/A</td>
+          <td style="padding: 12px; text-align: left;">Security National Bank</td>
+          <td style="padding: 12px; text-align: left;">Quote Given</td>
+          <td style="padding: 12px; text-align: left;" class="hot">Hot</td>
+          <td style="padding: 12px; text-align: left;">299,500.00</td>
+        </tr><tr>
+          <td style="padding: 12px; text-align: left;">N/A</td>
+          <td style="padding: 12px; text-align: left;">Monetary Authority of Singapore</td>
+          <td style="padding: 12px; text-align: left;">Quote Given</td>
+          <td style="padding: 12px; text-align: left;" class="hot">Hot</td>
+          <td style="padding: 12px; text-align: left;">241,602.68</td>
+        </tr><tr>
+          <td style="padding: 12px; text-align: left;">N/A</td>
+          <td style="padding: 12px; text-align: left;">IPI Singapore</td>
+          <td style="padding: 12px; text-align: left;">Quote Given</td>
+          <td style="padding: 12px; text-align: left;" class="hot">Hot</td>
+          <td style="padding: 12px; text-align: left;">219,053.99</td>
+        </tr><tr>
+          <td style="padding: 12px; text-align: left;">Simon Hawkins</td>
+          <td style="padding: 12px; text-align: left;">TheTechShackLTD</td>
+          <td style="padding: 12px; text-align: left;">Closed  Lost</td>
+          <td style="padding: 12px; text-align: left;" class="na">N/A</td>
+          <td style="padding: 12px; text-align: left;">210,726.73</td>
+        </tr><tr>
+          <td style="padding: 12px; text-align: left;">Jacqueline Brennan</td>
+          <td style="padding: 12px; text-align: left;">Webuyany car</td>
+          <td style="padding: 12px; text-align: left;">Closed  Lost</td>
+          <td style="padding: 12px; text-align: left;" class="na">N/A</td>
+          <td style="padding: 12px; text-align: left;">197,269.15</td>
+        </tr><tr>
+          <td style="padding: 12px; text-align: left;">Stefan Harzevoort</td>
+          <td style="padding: 12px; text-align: left;">The Shed</td>
+          <td style="padding: 12px; text-align: left;">Closed No Decision</td>
+          <td style="padding: 12px; text-align: left;" class="cold">Cold</td>
+          <td style="padding: 12px; text-align: left;">186,389.12</td>
+        </tr><tr>
+          <td style="padding: 12px; text-align: left;">N/A</td>
+          <td style="padding: 12px; text-align: left;">National Library Board</td>
+          <td style="padding: 12px; text-align: left;">Closed  Lost</td>
+          <td style="padding: 12px; text-align: left;" class="na">N/A</td>
+          <td style="padding: 12px; text-align: left;">183,372.29</td>
+        </tr><tr>
+          <td style="padding: 12px; text-align: left;">N/A</td>
+          <td style="padding: 12px; text-align: left;">Enterprise Singapore</td>
+          <td style="padding: 12px; text-align: left;">Quote Given</td>
+          <td style="padding: 12px; text-align: left;" class="hot">Hot</td>
+          <td style="padding: 12px; text-align: left;">182,971.00</td>
+        </tr><tr>
+          <td style="padding: 12px; text-align: left;">N/A</td>
+          <td style="padding: 12px; text-align: left;">MINDS</td>
+          <td style="padding: 12px; text-align: left;">Quote Given</td>
+          <td style="padding: 12px; text-align: left;" class="hot">Hot</td>
+          <td style="padding: 12px; text-align: left;">177,192.48</td>
+        </tr><tr>
+          <td style="padding: 12px; text-align: left;">N/A</td>
+          <td style="padding: 12px; text-align: left;">Maritime and Port Authority of Singapore</td>
+          <td style="padding: 12px; text-align: left;">Quote Given</td>
+          <td style="padding: 12px; text-align: left;" class="hot">Hot</td>
+          <td style="padding: 12px; text-align: left;">147,208.32</td>
+        </tr><tr>
+          <td style="padding: 12px; text-align: left;">N/A</td>
+          <td style="padding: 12px; text-align: left;">Civil Aviation Authority of Singapore</td>
+          <td style="padding: 12px; text-align: left;">Quote Given</td>
+          <td style="padding: 12px; text-align: left;" class="hot">Hot</td>
+          <td style="padding: 12px; text-align: left;">140,767.95</td>
+        </tr><tr>
+          <td style="padding: 12px; text-align: left;">Elliott Bolton</td>
+          <td style="padding: 12px; text-align: left;">Bolt-On Personnel</td>
+          <td style="padding: 12px; text-align: left;">Closed Won</td>
+          <td style="padding: 12px; text-align: left;" class="hot">Hot</td>
+          <td style="padding: 12px; text-align: left;">90,170.00</td>
+        </tr><tr>
+          <td style="padding: 12px; text-align: left;">N/A</td>
+          <td style="padding: 12px; text-align: left;">World Health Organisation</td>
+          <td style="padding: 12px; text-align: left;">Quote Given</td>
+          <td style="padding: 12px; text-align: left;" class="hot">Hot</td>
+          <td style="padding: 12px; text-align: left;">75,922.00</td>
+        </tr><tr>
+          <td style="padding: 12px; text-align: left;">N/A</td>
+          <td style="padding: 12px; text-align: left;">Elton John AIDS Foundation</td>
+          <td style="padding: 12px; text-align: left;">Closed  Lost</td>
+          <td style="padding: 12px; text-align: left;" class="cold">Cold</td>
+          <td style="padding: 12px; text-align: left;">70,200.00</td>
+        </tr><tr>
+          <td style="padding: 12px; text-align: left;">N/A</td>
+          <td style="padding: 12px; text-align: left;">MOE</td>
+          <td style="padding: 12px; text-align: left;">Quote Given</td>
+          <td style="padding: 12px; text-align: left;" class="hot">Hot</td>
+          <td style="padding: 12px; text-align: left;">65,267.86</td>
+        </tr><tr>
+          <td style="padding: 12px; text-align: left;">N/A</td>
+          <td style="padding: 12px; text-align: left;">Ministry Of Education</td>
+          <td style="padding: 12px; text-align: left;">Quote Given</td>
+          <td style="padding: 12px; text-align: left;" class="hot">Hot</td>
+          <td style="padding: 12px; text-align: left;">64,670.75</td>
+        </tr><tr>
+          <td style="padding: 12px; text-align: left;">N/A</td>
+          <td style="padding: 12px; text-align: left;">Singapore Tourism Board</td>
+          <td style="padding: 12px; text-align: left;">Quote Given</td>
+          <td style="padding: 12px; text-align: left;" class="hot">Hot</td>
+          <td style="padding: 12px; text-align: left;">61,587.83</td>
+        </tr><tr>
+          <td style="padding: 12px; text-align: left;">N/A</td>
+          <td style="padding: 12px; text-align: left;">Ministry of Education</td>
+          <td style="padding: 12px; text-align: left;">Quote Given</td>
+          <td style="padding: 12px; text-align: left;" class="hot">Hot</td>
+          <td style="padding: 12px; text-align: left;">58,745.17</td>
+        </tr><tr>
+          <td style="padding: 12px; text-align: left;">N/A</td>
+          <td style="padding: 12px; text-align: left;">SAFRA</td>
+          <td style="padding: 12px; text-align: left;">Quote Given</td>
+          <td style="padding: 12px; text-align: left;" class="hot">Hot</td>
+          <td style="padding: 12px; text-align: left;">57,443.89</td>
+        </tr><tr>
+          <td style="padding: 12px; text-align: left;">N/A</td>
+          <td style="padding: 12px; text-align: left;">Mindef SG</td>
+          <td style="padding: 12px; text-align: left;">Active Negotiation</td>
+          <td style="padding: 12px; text-align: left;" class="na">N/A</td>
+          <td style="padding: 12px; text-align: left;">55,800.00</td>
+        </tr><tr>
+          <td style="padding: 12px; text-align: left;">N/A</td>
+          <td style="padding: 12px; text-align: left;">Merlin Group</td>
+          <td style="padding: 12px; text-align: left;">Quote Given</td>
+          <td style="padding: 12px; text-align: left;" class="hot">Hot</td>
+          <td style="padding: 12px; text-align: left;">52,155.60</td>
+        </tr>
+    </table>
+    <table class="summary-table">
+      <tr>
+        <td>Total Deal Size</td>
+        <td>$5,019,971.94</td>
+      </tr>
+    </table>
+  
+    <h3>Breakdown by Lead Source</h3>
+    <table>
+      <tr>
+        <th>Source</th>
+        <th>Total Leads</th>
+        <th>Leads (%)</th>
+        <th>Total Deal Size ($)</th>
+      </tr>
+      <tr><td style="padding: 12px; text-align: left;">Tender</td>
+              <td style="padding: 12px; text-align: left;">18</td>
+              <td style="padding: 12px; text-align: left;">72.00%</td>
+              <td style="padding: 12px; text-align: left;">3,918,493.48</td></tr><tr><td style="padding: 12px; text-align: left;">Tradeshow</td>
+              <td style="padding: 12px; text-align: left;">1</td>
+              <td style="padding: 12px; text-align: left;">4.00%</td>
+              <td style="padding: 12px; text-align: left;">299,500.00</td></tr><tr><td style="padding: 12px; text-align: left;">fb</td>
+              <td style="padding: 12px; text-align: left;">2</td>
+              <td style="padding: 12px; text-align: left;">8.00%</td>
+              <td style="padding: 12px; text-align: left;">300,896.73</td></tr><tr><td style="padding: 12px; text-align: left;">Website</td>
+              <td style="padding: 12px; text-align: left;">1</td>
+              <td style="padding: 12px; text-align: left;">4.00%</td>
+              <td style="padding: 12px; text-align: left;">197,269.15</td></tr><tr><td style="padding: 12px; text-align: left;">Existing Client</td>
+              <td style="padding: 12px; text-align: left;">1</td>
+              <td style="padding: 12px; text-align: left;">4.00%</td>
+              <td style="padding: 12px; text-align: left;">186,389.12</td></tr><tr><td style="padding: 12px; text-align: left;">Client Referral</td>
+              <td style="padding: 12px; text-align: left;">1</td>
+              <td style="padding: 12px; text-align: left;">4.00%</td>
+              <td style="padding: 12px; text-align: left;">65,267.86</td></tr><tr><td style="padding: 12px; text-align: left;">Website Enquiry</td>
+              <td style="padding: 12px; text-align: left;">1</td>
+              <td style="padding: 12px; text-align: left;">4.00%</td>
+              <td style="padding: 12px; text-align: left;">52,155.60</td></tr>
+    </table>
+    <table class="summary-table">
+      <tr>
+        <td>Total Deal Size</td>
+        <td>$5,019,971.94</td>
+      </tr>
+    </table>
+    
+    <h3>Campaign Performance Table</h3>
+    <table>
+      <tr>
+        <th>Campaign Name</th>
+        <th>Total Leads</th>
+        <th>Percentage</th>
+        <th>Total Deal Size ($)</th>
+      </tr>
+      <tr>
+      <td style="padding: 12px; text-align: left;">N/A</td>
+      <td style="padding: 12px; text-align: left;">23.00</td>
+      <td style="padding: 12px; text-align: left;">92.00%</td>
+      <td style="padding: 12px; text-align: left;">4,719,075.21</td>
+    </tr><tr>
+      <td style="padding: 12px; text-align: left;">UK Campaign â GECKO</td>
+      <td style="padding: 12px; text-align: left;">1.00</td>
+      <td style="padding: 12px; text-align: left;">4.00%</td>
+      <td style="padding: 12px; text-align: left;">210,726.73</td>
+    </tr><tr>
+      <td style="padding: 12px; text-align: left;">SpiderX AI UK - Gecko</td>
+      <td style="padding: 12px; text-align: left;">1.00</td>
+      <td style="padding: 12px; text-align: left;">4.00%</td>
+      <td style="padding: 12px; text-align: left;">90,170.00</td>
+    </tr>
+    </table>
+    <table class="summary-table">
+      <tr>
+        <td>Total Deal Size</td>
+        <td>$5,019,971.94</td>
+      </tr>
+    </table>
+  
+    <h3>Breakdown by Country</h3>
+    <table>
+      <tr>
+        <th>Country</th>
+        <th>Leads Count</th>
+        <th>Total Deal Size ($)</th>
+      </tr>
+      <tr><td style="padding: 12px; text-align: left;">Singapore</td>
+              <td style="padding: 12px; text-align: left;">16</td>
+              <td style="padding: 12px; text-align: left;">3,778,894.17</td></tr><tr><td style="padding: 12px; text-align: left;">United States</td>
+              <td style="padding: 12px; text-align: left;">4</td>
+              <td style="padding: 12px; text-align: left;">646,259.12</td></tr><tr><td style="padding: 12px; text-align: left;">United Kingdom</td>
+              <td style="padding: 12px; text-align: left;">2</td>
+              <td style="padding: 12px; text-align: left;">407,995.88</td></tr><tr><td style="padding: 12px; text-align: left;">Switzerland</td>
+              <td style="padding: 12px; text-align: left;">1</td>
+              <td style="padding: 12px; text-align: left;">75,922.00</td></tr><tr><td style="padding: 12px; text-align: left;">India</td>
+              <td style="padding: 12px; text-align: left;">2</td>
+              <td style="padding: 12px; text-align: left;">110,900.77</td></tr>
+    </table>
+    <table class="summary-table">
+      <tr>
+        <td>Total Deal Size</td>
+        <td>$5,019,971.94</td>
+      </tr>
+    </table>
+  
+    <p>Thank you,</p>
+    <p>SpiderX Sales AI</p>
+  </body>
+  </html>

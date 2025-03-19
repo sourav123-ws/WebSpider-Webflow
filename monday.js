@@ -595,20 +595,23 @@ export const main = async () => {
     subjectForDatePrompt = `Top 25 Recent Leads Summary - ${todayDate} Evening Bulletin - [Preview Mode]`;
   }
 
-  // Sending the first email
-  sendMail(
-    "deepsubhra.ganguly@webspiders.com",
-    prompt,
-    subject,
-    "sourav.bhattacherjee@webspiders.com"
-  );
+  console.log("PROMPT",prompt);
+  // console.log("promptForDateFilter",promptForDateFilter);
 
-  // Sending the second email
-  sendMail(
-    "deepsubhra.ganguly@webspiders.com",
-    promptForDateFilter,
-    subjectForDatePrompt,
-    "sourav.bhattacherjee@webspiders.com"
-  );
+  // Sending the first email
+  // sendMail(
+  //   "dipesh.majumder@webspiders.com",
+  //   prompt,
+  //   subject,
+  //   "sourav.bhattacherjee@webspiders.com"
+  // );
+
+  // // // Sending the second email
+  // sendMail(
+  //   "dipesh.majumder@webspiders.com",
+  //   promptForDateFilter,
+  //   subjectForDatePrompt,
+  //   "sourav.bhattacherjee@webspiders.com"
+  // );
 };
 
