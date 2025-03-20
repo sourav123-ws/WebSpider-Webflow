@@ -1,4 +1,4 @@
-import { fetchCRMData, fetchLatestLeadsByDate } from "./monday.js";
+import { fetchCRMData, fetchLatestLeadsByDate, fetchTenderSpecificData } from "./monday.js";
 import yaml from "js-yaml";
 
 const MONDAY_API_KEY = process.env.MONDAY_API_KEY;
@@ -524,7 +524,7 @@ export const fetchLatestCommentsForLeads = async (leadIds) => {
 
 export const generatePrompt = async () => {
   const crmData = await fetchCRMData();
-  
+
   const todayDate = getCurrentDate();
   let crmDataYaml = yaml.dump(crmData);
 
@@ -625,12 +625,11 @@ export const generatePrompt = async () => {
   const detailedLeadsTable = crmData.leads
     .map((lead) => {
       // Determine the status class
-      console.log("LEAD",lead);
       let statusClass = "";
       if (lead.status === "Cold") statusClass = "cold";
       else if (lead.status === "Hot") statusClass = "hot";
       else if (lead.status === "Warm") statusClass = "warm";
-      else if (lead.status === "N/A") statusClass = "na"; // Add class for N/A
+      else if (lead.status === "N/A" || "Default") statusClass = "na"; // Add class for N/A
 
       return `<tr>
           <td style="padding: 12px; text-align: left;">${lead.name}</td>
@@ -903,7 +902,7 @@ export const generatePromptDateWise = async () => {
         status: lead.status || "N/A",
         stage: lead.stage || "N/A",
         comment: lead.comment || "N/A",
-        companyName : lead.company || "N/A"
+        companyName: lead.company || "N/A",
       };
     })
   );
@@ -1085,8 +1084,8 @@ export const generatePromptDateWise = async () => {
   return emailHtml;
 };
 
-
-{/* <h3>Lead Score Classification</h3>
+{
+  /* <h3>Lead Score Classification</h3>
     <table style="width: 30%;">
       <tr>
         <th>Score Range</th>
@@ -1104,4 +1103,384 @@ export const generatePromptDateWise = async () => {
         <td>80 - 100</td>
         <td>Hot</td>
       </tr>
-    </table> */}
+    </table> */
+}
+
+export const generateSpecificSourcePrompt = async () => {
+  const specificSourceData = await fetchTenderSpecificData();
+
+  const todayDate = getCurrentDate();
+
+  const countryCounts = {};
+  specificSourceData.leads.forEach((lead) => {
+    const country = lead.country || "Unknown";
+    const oppValue = parseFloat(lead.oppValue) || 0;
+    if (!countryCounts[country])
+      countryCounts[country] = { total: 0, totalValuation: 0 };
+    countryCounts[country].total++;
+    countryCounts[country].totalValuation += oppValue;
+  });
+
+  const countryTable = Object.entries(countryCounts)
+    .map(([country, { total, totalValuation }]) => {
+      const formattedValuation = totalValuation
+        ? totalValuation.toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })
+        : "N/A";
+      return `<tr><td style="padding: 12px; text-align: left;">${country}</td>
+                  <td style="padding: 12px; text-align: left;">${total}</td>
+                  <td style="padding: 12px; text-align: left;">${formattedValuation}</td></tr>`;
+    })
+    .join("");
+
+  const sourceCounts = {};
+  specificSourceData.leads.forEach((lead) => {
+    const source = lead.sourceOfOpportunity || "Unknown";
+    const oppValue = parseFloat(lead.oppValue) || 0;
+    if (!sourceCounts[source]) sourceCounts[source] = { total: 0, oppValue: 0 };
+    sourceCounts[source].total++;
+    sourceCounts[source].oppValue += oppValue;
+  });
+
+  const campaignCounts = {};
+  specificSourceData.leads.forEach((lead) => {
+    const campaign = lead.campaignName || "Unknown";
+    if (!campaignCounts[campaign])
+      campaignCounts[campaign] = {
+        totalLeads: 0,
+        conversionRate: 0,
+        oppValue: 0,
+      };
+    campaignCounts[campaign].totalLeads++;
+    campaignCounts[campaign].conversionRate +=
+      parseFloat(lead.conversionRate) || 0;
+    campaignCounts[campaign].oppValue += parseFloat(lead.oppValue) || 0;
+  });
+
+  const campaignTable = Object.entries(campaignCounts)
+    .map(([campaign, data]) => {
+      const percentage =
+        ((data.totalLeads / specificSourceData.totalLeads) * 100).toFixed(2) +
+        "%";
+
+      const totalLeads = Number(data.totalLeads) || 0;
+      const revenueImpact = Number(data.oppValue) || 0;
+
+      const formattedTotalLeads = totalLeads.toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+
+      const formattedRevenueImpact = revenueImpact.toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+
+      return `<tr>
+          <td style="padding: 12px; text-align: left;">${campaign}</td>
+          <td style="padding: 12px; text-align: left;">${formattedTotalLeads}</td>
+          <td style="padding: 12px; text-align: left;">${percentage}</td>
+          <td style="padding: 12px; text-align: left;">${formattedRevenueImpact}</td>
+        </tr>`;
+    })
+    .join("");
+
+  const formatDealSize = (dealSize) => {
+    if (!dealSize || isNaN(dealSize)) return "N/A";
+    return parseFloat(dealSize).toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  };
+
+  const totalDealSize = specificSourceData.leads.reduce(
+    (sum, lead) => sum + (parseFloat(lead.oppValue) || 0),
+    0
+  );
+  const formattedTotalDealSize = `$${totalDealSize.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+
+  // Updated detailedLeadsTable with status coloring for N/A
+  const detailedLeadsTable = specificSourceData.leads
+    .map((lead) => {
+      // // Determine the status class
+      // let statusClass = "";
+      // if (lead.status === "Cold") statusClass = "cold";
+      // else if (lead.status === "Hot") statusClass = "hot";
+      // else if (lead.status === "Warm") statusClass = "warm";
+      // else if (lead.status === "N/A") statusClass = "na"; // Add class for N/A
+
+      return `<tr>
+              <td style="padding: 12px; text-align: left;">${lead.company}</td>
+              <td style="padding: 12px; text-align: left;">${lead.country}</td>
+              <td style="padding: 12px; text-align: left;">${lead.stage}</td>
+              <td style="padding: 12px; text-align: left;">${formatDealSize(
+                lead.oppValue
+              )}</td>
+              <td style="padding: 12px; text-align: left;">${
+                lead.sourceOfOpportunity
+              }</td>
+            </tr>`;
+    })
+    .join("");
+
+  const totalLeads =
+    specificSourceData.totalLeads ||
+    Object.values(sourceCounts).reduce((sum, s) => sum + s.total, 0);
+
+  const leadSourceTable = Object.entries(sourceCounts)
+    .map(([source, { total, oppValue }]) => {
+      const percentage = ((total / totalLeads) * 100).toFixed(2) + "%";
+      const formattedOppValue = oppValue
+        ? parseFloat(oppValue).toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })
+        : "N/A";
+
+      return `<tr><td style="padding: 12px; text-align: left;">${source}</td>
+                  <td style="padding: 12px; text-align: left;">${total}</td>
+                  <td style="padding: 12px; text-align: left;">${percentage}</td>
+                  <td style="padding: 12px; text-align: left;">${formattedOppValue}</td></tr>`;
+    })
+    .join("");
+
+  const includedSources = [
+    "Tender",
+    "Order Forms",
+    "Renewal",
+    "Client Referral",
+    "Tradeshow",
+    "Website Enquiry",
+    "CU Partnership",
+    "Webinar",
+  ];
+
+  const promptExample = `
+      <html>
+      <head>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+        <style>
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          body {
+            font-family: 'Roboto', sans-serif;
+            color: #333;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 20px;
+            font-size: 14px;
+          }
+          h3 {
+            margin-top: 20px;
+            margin-bottom: 10px;
+            color: #007bff;
+            font-weight: 700;
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border: 1px solid #ddd;
+            overflow: hidden;
+          }
+          th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
+          }
+          th {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            text-transform: uppercase;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+          }
+          tr:nth-child(even) {
+            background-color: #f9f9f9;
+          }
+          tr:hover {
+            background-color: #f1f1f1;
+            transition: background-color 0.3s ease;
+          }
+          tr:hover td {
+            color: #333;
+          }
+          .summary-table {
+            width: 40%;
+            margin-left: auto;
+            background: linear-gradient(135deg, #343a40, #212529);
+            color: white;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+          }
+          .summary-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            font-weight: bold;
+            font-size: 14px;
+          }
+          p {
+            margin-bottom: 10px;
+            font-size: 14px;
+            line-height: 1.6;
+          }
+          .sources-list {
+            margin-bottom: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+          }
+          .source-tag {
+            background: #4CAF50;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+          }
+          /* Status colors with animations */
+          .cold {
+            background-color: #007bff !important;
+            color: white;
+            font-weight: bold;
+            animation: pulseCold 1.5s infinite;
+          }
+          .warm {
+            background-color: #ffc107 !important;
+            color: black;
+            font-weight: bold;
+            animation: pulseWarm 1.5s infinite;
+          }
+          .hot {
+            background-color: #dc3545 !important;
+            color: white;
+            font-weight: bold;
+            animation: pulseHot 1.5s infinite;
+          }
+          .na {
+            background-color: #6c757d !important; /* Gray for N/A */
+            color: white;
+            font-weight: bold;
+            animation: pulseNA 1.5s infinite;
+          }
+          @keyframes pulseCold {
+            0% { background-color: #007bff; }
+            50% { background-color: #0056b3; }
+            100% { background-color: #007bff; }
+          }
+          @keyframes pulseWarm {
+            0% { background-color: #ffc107; }
+            50% { background-color: #e0a800; }
+            100% { background-color: #ffc107; }
+          }
+          @keyframes pulseHot {
+            0% { background-color: #dc3545; }
+            50% { background-color: #a71d2a; }
+            100% { background-color: #dc3545; }
+          }
+          @keyframes pulseNA {
+            0% { background-color: #6c757d; }
+            50% { background-color: #495057; }
+            100% { background-color: #6c757d; }
+          }
+        </style>
+      </head>
+      <body>
+        <p>Hello,</p>
+        <p>Below is the Specific Tender Report showing the top 20 highest value leads from selected sources.</p>
+        
+        <div class="sources-list">
+          ${includedSources
+            .map((source) => `<span class="source-tag">${source}</span>`)
+            .join("")}
+        </div>
+      
+        <h3>Overall Pipeline Metrics (Specific Sources)</h3>
+        <table>
+          <tr>
+            <th>Metric</th>
+            <th>Value</th>
+            <th>Total Deal Value($)</th>
+          </tr>
+          <tr>
+            <td>Total Tenders in Pipeline</td>
+            <td>${specificSourceData.totalLeads || "N/A"}</td>
+            <td>${formattedTotalDealSize}</td>
+          </tr>
+        </table>
+      
+        <h3>Detailed Tenders Information (Top 20 by Deal Size)</h3>
+        <table>
+          <tr>
+            <th>Company</th>
+            <th>Country</th>
+            <th>Stage</th>
+            <th>Deal Size ($)</th>
+            <th>Source</th>
+          </tr>
+          ${detailedLeadsTable}
+        </table>
+        <table class="summary-table">
+          <tr>
+            <td>Total Deal Size</td>
+            <td>${formattedTotalDealSize}</td>
+          </tr>
+        </table>
+      
+        <h3>Breakdown by Lead Source</h3>
+        <table>
+          <tr>
+            <th>Source</th>
+            <th>Total Leads</th>
+            <th>Leads (%)</th>
+            <th>Total Deal Size ($)</th>
+          </tr>
+          ${leadSourceTable}
+        </table>
+        <table class="summary-table">
+          <tr>
+            <td>Total Deal Size</td>
+            <td>${formattedTotalDealSize}</td>
+          </tr>
+        </table>
+        
+      
+        <h3>Breakdown by Country</h3>
+        <table>
+          <tr>
+            <th>Country</th>
+            <th>Leads Count</th>
+            <th>Total Deal Size ($)</th>
+          </tr>
+          ${countryTable}
+        </table>
+        <table class="summary-table">
+          <tr>
+            <td>Total Deal Size</td>
+            <td>${formattedTotalDealSize}</td>
+          </tr>
+        </table>
+      
+        <p>Thank you,</p>
+        <p>SpiderX Sales AI</p>
+      </body>
+      </html>
+      `;
+
+  return promptExample;
+};
