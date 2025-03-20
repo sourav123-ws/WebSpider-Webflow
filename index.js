@@ -32,17 +32,17 @@ app.post("/get-recruitment-details",getRecruitmentDetails)
 app.post("/manage-score-value",managerScoreValue);
 
 
-// cron.schedule("10 9,21 * * *", async () => {
-//   console.log("Running cron job at 9:10 AM and 9:10 PM...");
-//   try {
-//     await main();
-//   } catch (error) {
-//     console.error("Error occurred during cron job execution:", error);
-//   }
-// });
-
-// main();
-
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Webhook listening on port ${PORT}`);
 });
+
+cron.schedule("0 10,22 * * *", async () => {
+  console.log("Running cron job at 10:00 AM and 10:00 PM...");
+  try {
+    await main();
+  } catch (error) {
+    console.error("Error occurred during cron job execution:", error);
+  }
+});
+
+
