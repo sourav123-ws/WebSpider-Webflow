@@ -1,8 +1,8 @@
 import fs from "fs";
 import nodemailer from "nodemailer";
 import {
-  generatePrompt,
   generatePromptDateWise,
+  generatePrompt,
   generateSpecificSourcePrompt,
   getCurrentDate,
 } from "./prompt.js";
@@ -79,6 +79,7 @@ export const fetchCRMData = async () => {
 
 
     let structuredLeads = allItems.map((deal) => ({
+      id: deal.id,
       name:
         deal.column_values.find((col) => col.id === "client_name_mkmx5s30")
           ?.text || "N/A",
@@ -413,11 +414,11 @@ export const fetchLatestLeadsByDate = async () => {
         deal.column_values.find((col) => col.id === "date_mkn218r2")?.text ||
         "N/A";
 
-      const finalDate = createdDate !== "N/A" ? createdDate : fallbackDate;
+      const finalDate = createdDate !== '' ? createdDate : fallbackDate;
       
 
       return {
-        leadId: deal.id || "N/A",
+        id: deal.id || "N/A",
         name: deal.column_values.find((col) => col.id === "name")?.text || "N/A",
         subitems:
           deal.column_values.find((col) => col.id === "subitems_mkmm2y67")
@@ -568,16 +569,10 @@ export const fetchTenderSpecificData = async () => {
 
     const includedSources = [
       "Tender",
-      "Order Forms",
-      "Renewal",
-      "Client Referral",
-      "Tradeshow",
-      "Website Enquiry",
-      "CU Partnership",
-      "Webinar",
     ];
 
     let structuredLeads = allItems.map((deal) => ({
+      id : deal.id ,
       name:
         deal.column_values.find((col) => col.id === "client_name_mkmx5s30")
           ?.text || "N/A",
@@ -611,7 +606,7 @@ export const fetchTenderSpecificData = async () => {
           ?.text?.replace(/,/g, "") || 0
       ),
       source:
-        deal.column_values.find((col) => col.id === "dropdown_mkncv7g")?.text ||
+        deal.column_values.find((col) => col.id === "text_mkp7511j")?.text ||
         "N/A",
       agents:
         deal.column_values.find((col) => col.id === "dropdown_mknc2kqf")
@@ -632,6 +627,9 @@ export const fetchTenderSpecificData = async () => {
       lastActivityDate:
         deal.column_values.find((col) => col.id === "date_mkna3qt1")?.text ||
         "N/A",
+      dateOfSubmission :
+        deal.column_values.find((col) => col.id === "submission_date_Mjj4fLpB")
+          ?.text || "N/A"
     }));
 
     // Filter to INCLUDE the specified sources
@@ -691,11 +689,11 @@ export const main = async () => {
 
   if (currentHour < 12) {
     subject = `Top 25 Deals(SpiderX.AI) Summary - ${todayDate} Morning Bulletin - [Preview Mode]`;
-    subjectForDatePrompt = `Recent 25 Leads Summary - ${todayDate} Morning Bulletin - [Preview Mode]`;
+    subjectForDatePrompt = `Recent 25 Leads(SpiderX.ai) Summary - ${todayDate} Morning Bulletin - [Preview Mode]`;
     subjectForTender = `Top 20 Tenders Summary - ${todayDate} Morning Bulletin - [Preview Mode]`;
   } else {
     subject = `Top 25 Deals(SpiderX.AI) Summary - ${todayDate} Evening Bulletin - [Preview Mode]`;
-    subjectForDatePrompt = `Recent 25 Leads Summary - ${todayDate} Evening Bulletin - [Preview Mode]`;
+    subjectForDatePrompt = `Recent 25 Leads(SpiderX.ai) Summary - ${todayDate} Evening Bulletin - [Preview Mode]`;
     subjectForTender = `Top 20 Tenders Summary - ${todayDate} Evening Bulletin - [Preview Mode]`;
   }
 
@@ -704,26 +702,26 @@ export const main = async () => {
   // console.log("promptForTender", promptForTender);
 
   // Sending the first email
-  // sendMail(
-  //   "dipesh.majumder@webspiders.com",
-  //   prompt,
-  //   subject,
-  //   "sourav.bhattacherjee@webspiders.com"
-  // );
+  sendMail(
+    "dipesh.majumder@webspiders.com",
+    prompt,
+    subject,
+    "sourav.bhattacherjee@webspiders.com"
+  );
 
-  // // Sending the second email
-  // sendMail(
-  //   "dipesh.majumder@webspiders.com",
-  //   promptForDateFilter,
-  //   subjectForDatePrompt,
-  //   "sourav.bhattacherjee@webspiders.com"
-  // );
+  // Sending the second email
+  sendMail(
+    "dipesh.majumder@webspiders.com",
+    promptForDateFilter,
+    subjectForDatePrompt,
+    "sourav.bhattacherjee@webspiders.com"
+  );
 
-  // // Sending the third email with promptForTender
-  // sendMail(
-  //   "dipesh.majumder@webspiders.com",
-  //   promptForTender,
-  //   subjectForTender,
-  //   "sourav.bhattacherjee@webspiders.com"
-  // );
+  // Sending the third email with promptForTender
+  sendMail(
+    "dipesh.majumder@webspiders.comm",
+    promptForTender,
+    subjectForTender,
+    "sourav.bhattacherjee@webspiders.com"
+  );
 };

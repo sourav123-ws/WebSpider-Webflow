@@ -121,7 +121,7 @@ export const getRecruitmentDetails = async (req, res) => {
     const columnValues = {
       "text_mkp06g1n": formData.Name || "", // Name
       "email_mkp0w299": { "email": formData.Email, "text": formData.Email } || "", // Email
-      "text_mkp5zamf":`${formData["Dial code"]}${formData.Phone}`,
+      "text_mkp5zamf": `${formData["Dial code"].replace("+", "")}${formData.Phone}`,
       // "numeric_mkp0j2f7": `${formData["Dial code"]} ${formData.Phone || ""}`,
       "text_mkp01p06": formData.Resume || "",
       "text_mkp0rre7": formData.CurrentLocation || "",
