@@ -674,6 +674,147 @@ export const fetchTenderSpecificData = async () => {
   }
 };
 
+export const fetchTenderPreQuotesData = async () => {
+  let allItems = [];
+  let cursor = null;
+  let hasMore = true;
+
+  try {
+    while (hasMore) {
+      const query = `
+        query {
+          boards(ids: ${BOARD_ID}) {
+            id
+            name
+            items_page (limit: 100, cursor: ${
+              cursor ? `"${cursor}"` : "null"
+            }) {
+              cursor
+              items {
+                id
+                name
+                column_values {
+                  id
+                  text
+                  value
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      const response = await axios.post(
+        "https://api.monday.com/v2",
+        { query },
+        {
+          headers: {
+            Authorization: `Bearer ${MONDAY_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const items = response.data?.data?.boards?.[0]?.items_page?.items || [];
+      allItems.push(...items);
+      cursor = response.data?.data?.boards?.[0]?.items_page?.cursor;
+      hasMore = !!cursor;
+    }
+
+    let structuredLeads = allItems.map((deal) => ({
+      id: deal.id,
+      name:
+        deal.column_values.find((col) => col.id === "client_name_mkmx5s30")
+          ?.text || "N/A",
+      company:
+        deal.column_values.find((col) => col.id === "text_mknx7fx9")?.text ||
+        "N/A",
+      stage:
+        deal.column_values.find((col) => col.id === "deal_stage")?.text ||
+        "N/A",
+      leadStatus:
+        deal.column_values.find((col) => col.id === "color_mknbte2j")?.text ||
+        "N/A",
+      score:
+        deal.column_values.find((col) => col.id === "numeric_mknseckr")?.text ||
+        "N/A",
+      status:
+        deal.column_values.find((col) => col.id === "color_mknbte2j")?.text ||
+        "N/A",
+      date:
+        deal.column_values.find((col) => col.id === "date_mknjmf73")?.text ||
+        "N/A",
+      comments:
+        deal.column_values.find((col) => col.id === "comments_Mjj4ohM0")
+          ?.text || "N/A",
+      currency:
+        deal.column_values.find((col) => col.id === "currency_Mjj4a1M0")
+          ?.text || "N/A",
+      oppValue: parseFloat(
+        deal.column_values
+          .find((col) => col.id === "numeric_mknx4ka9")
+          ?.text?.replace(/,/g, "") || 0
+      ),
+      source:
+        deal.column_values.find((col) => col.id === "text_mkp7511j")?.text ||
+        "N/A",
+      agents:
+        deal.column_values.find((col) => col.id === "dropdown_mknc2kqf")
+          ?.text || "N/A",
+      campaignName:
+        deal.column_values.find((col) => col.id === "text_mkncshyb")?.text ||
+        "Others - Website Organic, Calendly",
+      country:
+        deal.column_values.find((col) => col.id === "country_mknzs6a9")?.text ||
+        "N/A",
+      sourceOfOpportunity:
+        deal.column_values.find(
+          (col) => col.id === "source_of_opportunity_Mjj45Qma"
+        )?.text || "N/A",
+      dateOfSubmission:
+        deal.column_values.find((col) => col.id === "submission_date_Mjj4fLpB")
+          ?.text || "N/A",
+      dueDate:
+          deal.column_values.find((col) => col.id === "date_mkp8d2k9")?.value
+            ? (() => {
+                try {
+                  const dateObj = JSON.parse(
+                    deal.column_values.find((col) => col.id === "date_mkp8d2k9")?.value
+                  );
+                  return dateObj?.date || "N/A"; // Extract the date field if available
+                } catch (e) {
+                  return "N/A"; // Handle cases where value is not JSON
+                }
+              })()
+            : "N/A",
+        
+    }));
+
+    structuredLeads = structuredLeads.filter(
+      (lead) =>
+        lead.sourceOfOpportunity === "Tender" && lead.stage === "Pre Quote"
+    );
+
+    return structuredLeads;
+  } catch (error) {
+    console.error(
+      "❌ Error fetching Tender Pre Quotes leads:",
+      JSON.stringify(error.response?.data || error.message, null, 2)
+    );
+    return {
+      totalLeads: 0,
+      qualifiedLeads: 0,
+      leads: [],
+      leadSources: [],
+      campaigns: [],
+      countries: [],
+      aiInsights: [],
+      priorityLeads: [],
+    };
+  }
+};
+
+
 
 
 export const main = async () => {
@@ -706,7 +847,7 @@ export const main = async () => {
     "dipesh.majumder@webspiders.com",
     prompt,
     subject,
-    "sourav.bhattacherjee@webspiders.com"
+    "deepsubhra.ganguly@webspiders.com"
   );
 
   // Sending the second email
@@ -714,14 +855,14 @@ export const main = async () => {
     "dipesh.majumder@webspiders.com",
     promptForDateFilter,
     subjectForDatePrompt,
-    "sourav.bhattacherjee@webspiders.com"
+    "deepsubhra.ganguly@webspiders.com"
   );
 
   // Sending the third email with promptForTender
   sendMail(
-    "dipesh.majumder@webspiders.comm",
+    "dipesh.majumder@webspiders.com",
     promptForTender,
     subjectForTender,
-    "sourav.bhattacherjee@webspiders.com"
+    "deepsubhra.ganguly@webspiders.com"
   );
 };

@@ -1,6 +1,7 @@
 import {
   fetchCRMData,
   fetchLatestLeadsByDate,
+  fetchTenderPreQuotesData,
   fetchTenderSpecificData,
 } from "./monday.js";
 import yaml from "js-yaml";
@@ -284,6 +285,8 @@ export const generatePromptDateWise = async () => {
 
 export const generateSpecificSourcePrompt = async () => {
   const specificSourceData = await fetchTenderSpecificData();
+  const fetchTenderPreQuotes = await fetchTenderPreQuotesData();
+  console.log("FETCH TENDER PRE QUOTES DATA",fetchTenderPreQuotes);
 
   const todayDate = getCurrentDate();
 
@@ -311,19 +314,19 @@ export const generateSpecificSourcePrompt = async () => {
     })
     .join("");
 
-    const sourceCounts = {};
-    specificSourceData.leads.forEach((lead) => {
-      const source = lead.source || "Unknown";
-      const combinedSource = `${source}`;
-      
-      const oppValue = parseFloat(lead.oppValue) || 0;
-    
-      if (!sourceCounts[combinedSource]) {
-        sourceCounts[combinedSource] = { total: 0, oppValue: 0 };
-      }
-      sourceCounts[combinedSource].total++;
-      sourceCounts[combinedSource].oppValue += oppValue;
-    });
+  const sourceCounts = {};
+  specificSourceData.leads.forEach((lead) => {
+    const source = lead.source || "Unknown";
+    const combinedSource = `${source}`;
+
+    const oppValue = parseFloat(lead.oppValue) || 0;
+
+    if (!sourceCounts[combinedSource]) {
+      sourceCounts[combinedSource] = { total: 0, oppValue: 0 };
+    }
+    sourceCounts[combinedSource].total++;
+    sourceCounts[combinedSource].oppValue += oppValue;
+  });
 
   const campaignCounts = {};
   specificSourceData.leads.forEach((lead) => {
@@ -340,34 +343,6 @@ export const generateSpecificSourcePrompt = async () => {
     campaignCounts[campaign].oppValue += parseFloat(lead.oppValue) || 0;
   });
 
-  const campaignTable = Object.entries(campaignCounts)
-    .map(([campaign, data]) => {
-      const percentage =
-        ((data.totalLeads / specificSourceData.totalLeads) * 100).toFixed(2) +
-        "%";
-
-      const totalLeads = Number(data.totalLeads) || 0;
-      const revenueImpact = Number(data.oppValue) || 0;
-
-      const formattedTotalLeads = totalLeads.toLocaleString("en-US", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      });
-
-      const formattedRevenueImpact = revenueImpact.toLocaleString("en-US", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      });
-
-      return `<tr>
-          <td style="padding: 12px; text-align: left;">${campaign}</td>
-          <td style="padding: 12px; text-align: left;">${formattedTotalLeads}</td>
-          <td style="padding: 12px; text-align: left;">${percentage}</td>
-          <td style="padding: 12px; text-align: left;">${formattedRevenueImpact}</td>
-        </tr>`;
-    })
-    .join("");
-
   const formatDealSize = (dealSize) => {
     if (!dealSize || isNaN(dealSize)) return "N/A";
     return parseFloat(dealSize).toLocaleString("en-US", {
@@ -375,6 +350,32 @@ export const generateSpecificSourcePrompt = async () => {
       maximumFractionDigits: 2,
     });
   };
+
+  console.log("fetchTenderPreQuotes",fetchTenderPreQuotes);
+
+  // const preQuoteTenderLeads = fetchTenderPreQuotes.filter(
+  //   (lead) => lead.stage === "Tender" && lead.stage === "Pre Quote"
+  // );
+
+  const preQuoteTenderTable = fetchTenderPreQuotes
+  .map((lead) => {
+    return `
+      <tr>
+        <td style="padding: 12px; text-align: left;">
+          <a href="https://webspiders-force.monday.com/boards/1964391477/pulses/${lead.id}" 
+             target="_blank" 
+             style="color: #007bff; text-decoration: none; font-weight: bold;">
+            ${lead.company}
+          </a>
+        </td>
+        <td style="padding: 12px; text-align: left;">${lead.country}</td>
+        <td style="padding: 12px; text-align: left;">${lead.stage}</td>
+        <td style="padding: 12px; text-align: left;">${lead.dueDate}</td>
+      </tr>
+    `;
+  })
+  .join("");
+
 
   const totalDealSize = specificSourceData.leads.reduce(
     (sum, lead) => sum + (parseFloat(lead.oppValue) || 0),
@@ -385,16 +386,14 @@ export const generateSpecificSourcePrompt = async () => {
     maximumFractionDigits: 2,
   })}`;
 
-  // Updated detailedLeadsTable with status coloring for N/A
-  const detailedLeadsTable = specificSourceData.leads
-    .map((lead) => {
-      // // Determine the status class
-      // let statusClass = "";
-      // if (lead.status === "Cold") statusClass = "cold";
-      // else if (lead.status === "Hot") statusClass = "hot";
-      // else if (lead.status === "Warm") statusClass = "warm";
-      // else if (lead.status === "N/A") statusClass = "na"; // Add class for N/A
+  const activeLeads = specificSourceData.leads.filter(
+    (lead) =>
+      lead.stage !== "Closed  Lost" && lead.stage !== "Closed No Decision"
+  );
 
+  // Updated detailedLeadsTable with status coloring for N/A
+  const detailedLeadsTable = activeLeads
+    .map((lead) => {
       return `<tr>
       <td style="padding: 12px; text-align: left;">
   <a href="https://webspiders-force.monday.com/boards/1964391477/pulses/${
@@ -421,6 +420,68 @@ export const generateSpecificSourcePrompt = async () => {
     specificSourceData.totalLeads ||
     Object.values(sourceCounts).reduce((sum, s) => sum + s.total, 0);
 
+  const closedLostOrNoDecisionLeads = specificSourceData.leads.filter(
+    (lead) =>
+      lead.stage === "Closed  Lost" || lead.stage === "Closed No Decision"
+  );
+
+  const detailedClosedLeadsTable = closedLostOrNoDecisionLeads
+    .map((lead) => {
+      return `<tr>
+          <td style="padding: 12px; text-align: left;">
+            <a href="https://webspiders-force.monday.com/boards/1964391477/pulses/${
+              lead.id
+            }" 
+               target="_blank" 
+               style="color: #007bff; text-decoration: none; font-weight: bold;">
+              ${lead.company}
+            </a>
+          </td>
+          <td style="padding: 12px; text-align: left;">${lead.country}</td>
+          <td style="padding: 12px; text-align: left;">${lead.stage}</td>
+          <td style="padding: 12px; text-align: left;">${formatDealSize(
+            lead.oppValue
+          )}</td>
+          <td style="padding: 12px; text-align: left;">${
+            lead.dateOfSubmission
+          }</td>
+        </tr>`;
+    })
+    .join("");
+
+  // const closedLostOrNoDecisionLeads = specificSourceData.leads.filter(
+  //   (lead) =>
+  //     lead.stage === "Closed  Lost" || lead.stage === "Closed No Decision"
+  // );
+
+
+  const totalClosedLostOrNoDecisionDealSize =
+    closedLostOrNoDecisionLeads.reduce(
+      (sum, lead) => sum + (parseFloat(lead.oppValue) || 0),
+      0
+    );
+
+  const totalActiveDealSize = activeLeads.reduce(
+    (sum, lead) => sum + (parseFloat(lead.oppValue) || 0),
+    0
+  );
+
+  const formattedTotalClosedLostOrNoDecisionDealSize = `$${totalClosedLostOrNoDecisionDealSize.toLocaleString(
+    "en-US",
+    {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }
+  )}`;
+
+  const formattedTotalActiveDealSize = `$${totalActiveDealSize.toLocaleString(
+    "en-US",
+    {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }
+  )}`;
+
   const leadSourceTable = Object.entries(sourceCounts)
     .map(([combinedSource, { total, oppValue }]) => {
       const percentage = ((total / totalLeads) * 100).toFixed(2) + "%";
@@ -438,9 +499,9 @@ export const generateSpecificSourcePrompt = async () => {
     })
     .join("");
 
-    const uniqueSources = Object.keys(sourceCounts)
-  .map((source) => `<span class="source-tag">${source}</span>`)
-  .join("");
+  const uniqueSources = Object.keys(sourceCounts)
+    .map((source) => `<span class="source-tag">${source}</span>`)
+    .join("");
 
   const promptExample = `
       <html>
@@ -459,6 +520,15 @@ export const generateSpecificSourcePrompt = async () => {
             padding: 20px;
             font-size: 14px;
           }
+            h4{
+              margin-top: 20px;
+              margin-bottom: 10px;
+              color: #007bff;
+              font-weight: 700;
+              font-size: 18px;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+              }
           h3 {
             margin-top: 20px;
             margin-bottom: 10px;
@@ -500,6 +570,20 @@ export const generateSpecificSourcePrompt = async () => {
           }
           tr:hover td {
             color: #333;
+          }
+            .deals-container {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          }
+
+          .active-deals {
+            background-color: #e3f2fd; /* Light Blue */
+          }
+
+          .closed-deals {
+            background-color: #ffebee; /* Light Red */
           }
           .summary-table {
             width: 40%;
@@ -603,8 +687,22 @@ export const generateSpecificSourcePrompt = async () => {
             <td>${formattedTotalDealSize}</td>
           </tr>
         </table>
+
+        <h3>New Tenders Shortlisted</h3>
+        <table>
+          <tr>
+            <th>Company</th>
+            <th>Country</th>
+            <th>Stage</th>
+            <th>Due Date</th>
+          </tr>
+          ${preQuoteTenderTable}
+        </table>
       
         <h3>Top Tenders Information (Top 20 by Deal Size)</h3>
+
+        <div class="deals-container active-deals">
+        <h4>Active Deals</h4>
         <table>
           <tr>
             <th>Company</th>
@@ -615,12 +713,34 @@ export const generateSpecificSourcePrompt = async () => {
           </tr>
           ${detailedLeadsTable}
         </table>
+
         <table class="summary-table">
           <tr>
             <td>Total Deal Size</td>
-            <td>${formattedTotalDealSize}</td>
+            <td>${formattedTotalActiveDealSize}</td>
           </tr>
         </table>
+        </div>
+
+        <div class="deals-container active-deals">
+        <h4>Closed Deals</h4>
+        <table>
+          <tr>
+            <th>Company</th>
+            <th>Country</th>
+            <th>Stage</th>
+            <th>Deal Size (Converted to $)</th>
+            <th>Date Of Submission</th>
+          </tr>
+          ${detailedClosedLeadsTable}
+        </table>
+        <table class="summary-table">
+          <tr>
+            <td>Total Deal Size</td>
+            <td>${formattedTotalClosedLostOrNoDecisionDealSize}</td>
+          </tr>
+        </table>
+        </div>
       
         <h3>Top 20 Tenders - Breakdown by Lead Source</h3>
         <table>
@@ -638,7 +758,6 @@ export const generateSpecificSourcePrompt = async () => {
             <td>${formattedTotalDealSize}</td>
           </tr>
         </table>
-        
       
         <h3>Top 20 Tenders - Breakdown by Country</h3>
         <table>
