@@ -286,7 +286,8 @@ export const generatePromptDateWise = async () => {
 export const generateSpecificSourcePrompt = async () => {
   const specificSourceData = await fetchTenderSpecificData();
   const fetchTenderPreQuotes = await fetchTenderPreQuotesData();
-  console.log("FETCH TENDER PRE QUOTES DATA",fetchTenderPreQuotes);
+  // console.log("FETCH TENDER PRE QUOTES DATA",fetchTenderPreQuotes);
+  console.log("Specific Source Data",specificSourceData);
 
   const todayDate = getCurrentDate();
 
@@ -351,7 +352,7 @@ export const generateSpecificSourcePrompt = async () => {
     });
   };
 
-  console.log("fetchTenderPreQuotes",fetchTenderPreQuotes);
+  // console.log("fetchTenderPreQuotes",fetchTenderPreQuotes);
 
   // const preQuoteTenderLeads = fetchTenderPreQuotes.filter(
   //   (lead) => lead.stage === "Tender" && lead.stage === "Pre Quote"
@@ -388,13 +389,16 @@ export const generateSpecificSourcePrompt = async () => {
 
   const activeLeads = specificSourceData.leads.filter(
     (lead) =>
-      lead.stage !== "Closed  Lost" && lead.stage !== "Closed No Decision"
+      lead.stage !== "Closed  Lost" &&
+      lead.stage !== "Closed No Decision" &&
+      !(lead.sourceOfOpportunity === "Tender" && lead.stage === "Pre Quote")
   );
 
   // Updated detailedLeadsTable with status coloring for N/A
   const detailedLeadsTable = activeLeads
     .map((lead) => {
       return `<tr>
+      <td style="padding: 12px; text-align: left;">${lead.date}</td>
       <td style="padding: 12px; text-align: left;">
   <a href="https://webspiders-force.monday.com/boards/1964391477/pulses/${
     lead.id
@@ -406,6 +410,7 @@ export const generateSpecificSourcePrompt = async () => {
 </td>
               <td style="padding: 12px; text-align: left;">${lead.country}</td>
               <td style="padding: 12px; text-align: left;">${lead.stage}</td>
+              <td style="padding: 12px; text-align: left;">${lead.source}</td>
               <td style="padding: 12px; text-align: left;">${formatDealSize(
                 lead.oppValue
               )}</td>
@@ -439,6 +444,7 @@ export const generateSpecificSourcePrompt = async () => {
           </td>
           <td style="padding: 12px; text-align: left;">${lead.country}</td>
           <td style="padding: 12px; text-align: left;">${lead.stage}</td>
+          <td style="padding: 12px; text-align: left;">${lead.source}</td>
           <td style="padding: 12px; text-align: left;">${formatDealSize(
             lead.oppValue
           )}</td>
@@ -668,25 +674,11 @@ export const generateSpecificSourcePrompt = async () => {
       </head>
       <body>
         <p>Hello,</p>
-        <p>Below is the Specific Tender Report showing the top 20 highest value Tenders from selected sources.</p>
+        <p>Below is the Specific Tender Report showing the top 50 Recent Tenders from selected sources.</p>
         
         <div class="sources-list">
           ${uniqueSources}
         </div>
-      
-        <h3>Overall Pipeline Metrics (Specific Sources)</h3>
-        <table>
-          <tr>
-            <th>Metric</th>
-            <th>Value</th>
-            <th>Total Deal Value(Converted to $)</th>
-          </tr>
-          <tr>
-            <td>Total Tenders in Pipeline</td>
-            <td>${specificSourceData.totalLeads || "N/A"}</td>
-            <td>${formattedTotalDealSize}</td>
-          </tr>
-        </table>
 
         <h3>New Tenders Shortlisted</h3>
         <table>
@@ -699,15 +691,17 @@ export const generateSpecificSourcePrompt = async () => {
           ${preQuoteTenderTable}
         </table>
       
-        <h3>Top Tenders Information (Top 20 by Deal Size)</h3>
+        <h3>Recent 50 Tenders Information</h3>
 
         <div class="deals-container active-deals">
         <h4>Active Deals</h4>
         <table>
           <tr>
+            <th>Date</th>
             <th>Company</th>
             <th>Country</th>
             <th>Stage</th>
+            <th>Source</th>
             <th>Deal Size (Converted to $)</th>
             <th>Date Of Submission</th>
           </tr>
@@ -722,13 +716,14 @@ export const generateSpecificSourcePrompt = async () => {
         </table>
         </div>
 
-        <div class="deals-container active-deals">
-        <h4>Closed Deals</h4>
+        <div class="deals-container closed-deals">
+        <h4>Deals Lost / Closed No Decision</h4>
         <table>
           <tr>
             <th>Company</th>
             <th>Country</th>
             <th>Stage</th>
+            <th>Source</th>
             <th>Deal Size (Converted to $)</th>
             <th>Date Of Submission</th>
           </tr>
@@ -742,7 +737,7 @@ export const generateSpecificSourcePrompt = async () => {
         </table>
         </div>
       
-        <h3>Top 20 Tenders - Breakdown by Lead Source</h3>
+        <h3>Recent 50 Tenders - Breakdown by Lead Source</h3>
         <table>
           <tr>
             <th>Source</th>
@@ -759,7 +754,7 @@ export const generateSpecificSourcePrompt = async () => {
           </tr>
         </table>
       
-        <h3>Top 20 Tenders - Breakdown by Country</h3>
+        <h3>Recent 50 Tenders - Breakdown by Country</h3>
         <table>
           <tr>
             <th>Country</th>
