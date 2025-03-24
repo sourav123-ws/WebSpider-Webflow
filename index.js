@@ -32,13 +32,14 @@ app.post("/get-recruitment-details",getRecruitmentDetails)
 app.post("/manage-score-value",managerScoreValue);
 app.get("/run-cron", async (req, res) => {
   console.log("🚀 Running cron job triggered by cron-job.org...");
-  try {
-    await main();
-    res.status(200).send("Cron job executed successfully.");
-  } catch (error) {
-    console.error("❌ Error occurred during cron job execution:", error);
-    res.status(500).send("Cron job execution failed.");
-  }
+  setTimeout(async () => {
+    try {
+      await main();
+      console.log("✅ Cron job completed successfully.");
+    } catch (error) {
+      console.error("❌ Error occurred during cron job execution:", error);
+    }
+  }, 1000);
 });
 
 
