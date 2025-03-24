@@ -30,17 +30,20 @@ app.post("/webflow-webhook",webflowWebhooks);
 app.post("/monday-webhook",mondayWebhooks);
 app.post("/get-recruitment-details",getRecruitmentDetails)
 app.post("/manage-score-value",managerScoreValue);
+
 app.get("/run-cron", async (req, res) => {
-  console.log("🚀 Running cron job triggered by cron-job.org...");
-  setTimeout(async () => {
-    try {
-      await main();
-      console.log("✅ Cron job completed successfully.");
-    } catch (error) {
-      console.error("❌ Error occurred during cron job execution:", error);
-    }
-  }, 1000);
+  console.log("🚀 Running cron job...");
+
+  try {
+    await main();
+    console.log("✅ Cron job completed successfully.");
+    res.json({ success: true });
+  } catch (error) {
+    console.error("❌ Error during cron job execution:", error);
+    res.status(500).json({ success: false, error: error.message }); // Return error response
+  }
 });
+
 
 
 app.listen(PORT, "0.0.0.0", () => {
