@@ -113,6 +113,7 @@ export const getRecruitmentDetails = async (req, res) => {
   console.log("HERE");
   try {
     const formData = req.body.payload.data;
+    console.log("Form Data",formData);
     console.log("FROM DATA",formData);
     if (formData.JobTitle !== "Pratham 2.0 - An Exclusive Fresh Tech Talent Hiring Program") {
       return res.status(200).json({ message: "Form name does not match, no action taken." });
