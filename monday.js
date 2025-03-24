@@ -814,7 +814,7 @@ export const main = async () => {
 
   // Sending the first email
   sendMail(
-    "ronit.roy@webspiders.com",
+    "utsab.ghosh@webspiders.com",
     prompt,
     subject,
     "sourav.bhattacherjee@webspiders.com"
@@ -822,7 +822,7 @@ export const main = async () => {
 
   // // Sending the second email
   sendMail(
-    "ronit.roy@webspiders.com",
+    "utsab.ghosh@webspiders.com",
     promptForDateFilter,
     subjectForDatePrompt,
     "sourav.bhattacherjee@webspiders.com"
@@ -830,7 +830,7 @@ export const main = async () => {
 
   // // Sending the third email with promptForTender
   sendMail(
-    "ronit.roy@webspiders.com",
+    "utsab.ghosh@webspiders.com",
     promptForTender,
     subjectForTender,
     "sourav.bhattacherjee@webspiders.com"
