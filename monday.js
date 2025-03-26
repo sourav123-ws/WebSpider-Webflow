@@ -5,6 +5,7 @@ import {
   generatePrompt,
   generateSpecificSourcePrompt,
   getCurrentDate,
+  aiGenerateData,
 } from "./prompt.js";
 import { completions } from "./openai.js";
 import { sendMail } from "./utils.js";
@@ -67,14 +68,7 @@ export const fetchCRMData = async () => {
 
 
     const excludedSources = [
-      "Tender",
-      "Order Forms",
-      "Renewal",
-      "Client Referral",
-      "Tradeshow",
-      "Website Enquiry",
-      "CU Partnership",
-      "Webinar",
+      "Tender"
     ];
 
 
@@ -136,7 +130,7 @@ export const fetchCRMData = async () => {
 
     structuredLeads = structuredLeads
       .sort((a, b) => b.oppValue - a.oppValue)
-      .slice(0, 25);
+      .slice(0, 50);
 
     const structuredData = {
       totalLeads: structuredLeads.length,
@@ -486,7 +480,7 @@ export const fetchLatestLeadsByDate = async () => {
         dateObj: new Date(lead.createdDate),
       }))
       .sort((a, b) => b.dateObj - a.dateObj)
-      .slice(0, 25)
+      .slice(0, 50)
       .map((lead) => {
         delete lead.dateObj;
         return lead;
@@ -791,6 +785,9 @@ export const main = async () => {
   const prompt = await generatePrompt();
   const promptForDateFilter = await generatePromptDateWise();
   const promptForTender = await generateSpecificSourcePrompt();
+  const emailBody = await aiGenerateData();
+
+
   const todayDate = getCurrentDate();
   const currentHour = new Date().getHours();
 
@@ -799,38 +796,41 @@ export const main = async () => {
   let subjectForTender;
 
   if (currentHour < 12) {
-    subject = `Top 25 Deals(SpiderX.AI) Summary - ${todayDate} Morning Bulletin - [Preview Mode]`;
-    subjectForDatePrompt = `Recent 25 Leads(SpiderX.ai) Summary - ${todayDate} Morning Bulletin - [Preview Mode]`;
+    subject = `Top 50 Deals(SpiderX.AI) Summary - ${todayDate} Morning Bulletin - [Preview Mode]`;
+    subjectForDatePrompt = `Recent 50 Leads(SpiderX.ai) Summary - ${todayDate} Morning Bulletin - [Preview Mode]`;
     subjectForTender = `Recent 50 Tenders Summary - ${todayDate} Morning Bulletin - [Preview Mode]`;
   } else {
-    subject = `Top 25 Deals(SpiderX.AI) Summary - ${todayDate} Evening Bulletin - [Preview Mode]`;
-    subjectForDatePrompt = `Recent 25 Leads(SpiderX.ai) Summary - ${todayDate} Evening Bulletin - [Preview Mode]`;
+    subject = `Top 50 Deals(SpiderX.AI) Summary - ${todayDate} Evening Bulletin - [Preview Mode]`;
+    subjectForDatePrompt = `Recent 50 Leads(SpiderX.ai) Summary - ${todayDate} Evening Bulletin - [Preview Mode]`;
     subjectForTender = `Recent 50 Tenders Summary - ${todayDate} Evening Bulletin - [Preview Mode]`;
   }
 
-  // console.log("PROMPT", prompt);
+  const combinedEmailBody = `${emailBody} <br><br> <hr> <br><br> ${prompt}`;
+
+  // console.log("PROMPT", emailBody);
   // console.log("promptForDateFilter", promptForDateFilter);
   // console.log("promptForTender", promptForTender);
+  console.log(combinedEmailBody);
 
   // Sending the first email
   sendMail(
-    "dipesh.majumder@webspiders.com",
-    prompt,
+    ["presalesgroup@webspiders.com","dipesh.majumder@webspiders.com"],
+    combinedEmailBody,
     subject,
     "sourav.bhattacherjee@webspiders.com"
   );
 
-  // // Sending the second email
+  // // // Sending the second email
   sendMail(
-    "dipesh.majumder@webspiders.com",
+    ["presalesgroup@webspiders.com","dipesh.majumder@webspiders.com"],
     promptForDateFilter,
     subjectForDatePrompt,
     "sourav.bhattacherjee@webspiders.com"
   );
 
-  // // Sending the third email with promptForTender
+  // // // Sending the third email with promptForTender
   sendMail(
-    "dipesh.majumder@webspiders.com",
+    ["presalesgroup@webspiders.com","dipesh.majumder@webspiders.com"],
     promptForTender,
     subjectForTender,
     "sourav.bhattacherjee@webspiders.com"

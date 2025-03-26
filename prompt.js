@@ -5,6 +5,7 @@ import {
   fetchTenderSpecificData,
 } from "./monday.js";
 import yaml from "js-yaml";
+import { completions } from "./openai.js";
 
 const MONDAY_API_KEY = process.env.MONDAY_API_KEY;
 
@@ -259,7 +260,7 @@ export const generatePromptDateWise = async () => {
 </head>
 <body>
   <div class="container">
-    <h3>Recent 25 Leads (SpiderX.ai)- Breakdown by Recent Date</h3>
+    <h3>Recent 50 Leads (SpiderX.ai)- Breakdown by Recent Date</h3>
     <table>
       <tr>
         <th>Date</th>
@@ -287,7 +288,7 @@ export const generateSpecificSourcePrompt = async () => {
   const specificSourceData = await fetchTenderSpecificData();
   const fetchTenderPreQuotes = await fetchTenderPreQuotesData();
   // console.log("FETCH TENDER PRE QUOTES DATA",fetchTenderPreQuotes);
-  console.log("Specific Source Data",specificSourceData);
+  console.log("Specific Source Data", specificSourceData);
 
   const todayDate = getCurrentDate();
 
@@ -359,8 +360,8 @@ export const generateSpecificSourcePrompt = async () => {
   // );
 
   const preQuoteTenderTable = fetchTenderPreQuotes
-  .map((lead) => {
-    return `
+    .map((lead) => {
+      return `
       <tr>
         <td style="padding: 12px; text-align: left;">
           <a href="https://webspiders-force.monday.com/boards/1964391477/pulses/${lead.id}" 
@@ -374,9 +375,8 @@ export const generateSpecificSourcePrompt = async () => {
         <td style="padding: 12px; text-align: left;">${lead.dueDate}</td>
       </tr>
     `;
-  })
-  .join("");
-
+    })
+    .join("");
 
   const totalDealSize = specificSourceData.leads.reduce(
     (sum, lead) => sum + (parseFloat(lead.oppValue) || 0),
@@ -459,7 +459,6 @@ export const generateSpecificSourcePrompt = async () => {
   //   (lead) =>
   //     lead.stage === "Closed  Lost" || lead.stage === "Closed No Decision"
   // );
-
 
   const totalClosedLostOrNoDecisionDealSize =
     closedLostOrNoDecisionLeads.reduce(
@@ -1210,7 +1209,7 @@ td {
       </tr>
     </table>
   
-    <h3>Top 25 Deals (SpiderX.ai) Information</h3>
+    <h3>Top 50 Deals (SpiderX.ai) Information</h3>
 
 <div class="deals-container active-deals">
   <h4>Active Deals</h4>
@@ -1255,7 +1254,7 @@ td {
       </table>
 </div>
 
-    <h3>Top 25 Deals - Sources Breakdown (SpiderX.ai)</h3>
+    <h3>Top 50 Deals - Sources Breakdown (SpiderX.ai)</h3>
     <table>
       <tr>
         <th>Source</th>
@@ -1272,7 +1271,7 @@ td {
       </tr>
     </table>
     
-    <h3>Top 25 Deals - Campaign Performance(SpiderX.ai)</h3>
+    <h3>Top 50 Deals - Campaign Performance(SpiderX.ai)</h3>
     <table>
       <tr>
         <th>Campaign Name</th>
@@ -1289,7 +1288,7 @@ td {
       </tr>
     </table>
   
-    <h3>Top 25 Deals - Country(SpiderX.ai)</h3>
+    <h3>Top 50 Deals - Country(SpiderX.ai)</h3>
     <table>
       <tr>
         <th>Country</th>
@@ -1313,3 +1312,418 @@ td {
 
   return promptExample;
 };
+
+// export const aiGenerateData = async()=>{
+//   const crmData = await fetchCRMData();
+//   const aiPrompt = `You are an expert Sales Director analyzing a CRM report for SpiderX.ai. The report contains details on the sales pipeline, lead sources, deal values, and lost opportunities. Based on the provided data, generate a comprehensive Sales Action Plan with the following sections:
+// 1. Immediate Revenue-Boosting Actions (Next 7-14 Days)
+
+//     Focus: Close high-priority warm/hot deals.
+
+//         List specific high-value leads (e.g., Synvergent HealthConnect, Target Recruit) with deal values and assigned reps.
+
+//         Outline concrete actions (e.g., follow-ups within 48 hours, limited-time incentives, AI-driven sequences).
+
+//     Re-engage Lost Deals: Identify 2-3 high-potential lost opportunities with tailored win-back strategies (e.g., discounts, feature demos).
+
+// 2. Optimizing Lead Conversion (Next 30 Days)
+
+//     Weak Lead Sources: Identify underperforming channels (e.g., LinkedIn ads, cold emails) and suggest fixes (e.g., better targeting, refreshed messaging).
+
+//     Client/Referral Programs: Propose 1-2 tactics to boost referrals (e.g., rewards for successful referrals, case study showcases).
+
+// 3. Strategic Growth Actions (Next 60-90 Days)
+
+//     Regional Expansion: Highlight top revenue-generating regions and recommend expansion strategies (e.g., hire local reps, geo-targeted campaigns).
+
+//     Campaign Adjustments: Analyze past campaign performance (e.g., CTR, conversions) and suggest optimizations (e.g., A/B test ad copies, adjust budgets).
+
+// 4. Sales Process Optimization
+
+//     AI Automation: Specify how AI (e.g., SpiderX AI) can automate follow-ups or lead scoring.
+
+//     Pipeline Tracking: Recommend weekly review cadences and dashboard metrics (e.g., deal stage, rep performance).
+
+// 5. Final Expected Outcomes (Next 3 Months)
+
+//     Revenue Impact: Estimate targets (e.g., ‘Close 50% of hot leads → $120K revenue’).
+
+//     KPIs: Define metrics (e.g., 20% increase in referrals, 15% higher conversion from retargeted lost deals).
+
+// Requirements:
+
+//     Be data-driven (use deal values, conversion rates from the CRM).
+
+//     Prioritize actionable steps with clear owners (e.g., ‘Prakash Reddy to lead Synvergent HealthConnect deal’).
+
+//     Structure output with bullet points, headers, and concise language.`
+// const messages=[
+//   {
+//     role: "user",
+//     content: `Context: ${JSON.stringify(crmData)}
+//     Based on the above context, execute the following instructions: ${aiPrompt}`
+//   }
+// ]
+
+//   const aiResponse = await completions( messages);
+//   // console.log("AI RESPONSE",aiResponse);
+//   const aiResponseText = String(aiResponse.data || aiResponse);
+
+//     // Extract email body by removing the subject line
+//     const emailBody = aiResponseText.replace(/^Subject:.*?\n\n/, "").trim();
+//     return emailBody ;
+// }
+
+export const aiGenerateData = async () => {
+  const crmData = await fetchCRMData();
+  console.log(crmData);
+  const aiPrompt = `You are an expert Sales Director analyzing a CRM report for SpiderX.ai. The report contains details on the sales pipeline, lead sources, deal values, and lost opportunities. Based on {{this_report}}, generate a comprehensive Sales Action Plan with the following structure:
+
+    Immediate Revenue-Boosting Actions (Next 7-14 Days)
+
+    Focus on closing high-priority warm and hot deals.
+
+    Identify specific high-value leads and outline actions to close them.
+
+    Develop a strategy to re-engage lost deals with high potential.
+
+    Optimizing Lead Conversion (Next 30 Days)
+
+    Identify weak-performing lead sources and suggest improvements.
+
+    Strengthen existing client and referral programs to drive revenue.
+
+    Strategic Growth Actions (Next 60-90 Days)
+
+    Identify key regions contributing to revenue and recommend expansion strategies.
+
+    Evaluate campaign performance and recommend adjustments.
+
+    Sales Process Optimization
+
+    Implement AI-driven sales automation and personalized follow-ups.
+
+    Introduce weekly pipeline reviews and deal-tracking dashboards.
+
+    Final Expected Outcomes (Next 3 Months)
+
+    Predict revenue impact based on successful execution of the above actions.
+
+    Provide estimated targets for deal closures, recovered revenue, and improved conversions.
+
+    Ensure the response is data-driven, structured, and provides actionable recommendations`;
+
+  const messages = [
+    {
+      role: "user",
+      content: `Context: ${JSON.stringify(
+        crmData
+      )}\nBased on the above context, execute the following instructions: ${aiPrompt}`,
+    },
+  ];
+
+  const aiResponse = await completions(messages);
+  const aiResponseText = String(aiResponse.data?.data || aiResponse.data);
+  const emailBody = aiResponseText.replace(/^Subject:.*?\n\n/, "").trim();
+
+  console.log("AI Response:", JSON.stringify(aiResponse, null, 2));
+  // Convert plain text to HTML format
+  const formattedHtml = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+          <title>Immediate Revenue-Boosting Actions</title>
+          <style>
+            body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    font-size: 14px; /* Reduced font size */
+    border: 2px solid #333;
+    border-radius: 10px;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f4f6f9;
+}
+
+h1 {
+    color: #2c3e50;
+    border-bottom: 3px solid #3498db;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    font-size: 20px; /* Slightly smaller */
+}
+
+h2 {
+    color: #2980b9;
+    margin-top: 20px;
+    padding-bottom: 5px;
+    font-size: 18px; /* Reduced size */
+}
+
+.section {
+    background-color: #ffffff;
+    border-left: 6px solid #3498db;
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    font-size: 13px; /* Smaller section font */
+}
+
+ul {
+    padding-left: 18px;
+}
+
+li {
+    margin-bottom: 6px;
+    font-size: 13px; /* Adjusted list font */
+}
+
+.important {
+    font-weight: bold;
+    color: #d35400;
+    font-size: 14px; /* Reduced but still noticeable */
+}
+
+.kpi {
+    background-color: #e8f4fc;
+    padding: 8px;
+    border-radius: 4px;
+    margin-top: 10px;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+    </style>
+</head>
+<body>
+    <div style="
+    font-family: Arial, sans-serif; 
+    background-color: #f4f6f9; 
+    padding: 20px;
+    max-width: 800px; 
+    margin: 0 auto;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);">
+
+    <h1 style="
+        color: #2c3e50; 
+        border-bottom: 3px solid #3498db; 
+        padding-bottom: 10px; 
+        margin-bottom: 20px; 
+        text-align: center;">
+        Analysis from AI Sales Director
+    </h1>
+
+    <div style="
+        background-color: #ffffff; 
+        padding: 20px; 
+        border-radius: 8px; 
+        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+        border-left: 6px solid #3498db;
+        line-height: 1.6; 
+        color: #333;">
+        ${formatTextToHtml(emailBody)}
+    </div>
+</div>
+</body>
+</html>
+
+  `;
+
+  return formattedHtml;
+};
+
+function formatTextToHtml(text) {
+  return text
+    .split("\n")
+    .map((line) => {
+      if (!/^\d+/.test(line.trim())) {
+        return `<strong>${line.trim()}</strong>`;
+      }
+      return line.trim();
+    })
+    .join("<br>");
+}
+
+// export const aiGenerateData = async () => {
+//   const crmData = await fetchCRMData();
+//   console.log(crmData);
+//   const aiPrompt = `You are an expert Sales Director analyzing a CRM report for SpiderX.ai. The report contains details on the sales pipeline, lead sources, deal values, and lost opportunities. Based on {{this_report}}, generate a comprehensive Sales Action Plan with the following structure:
+
+//     Immediate Revenue-Boosting Actions (Next 7-14 Days)
+
+//     Focus on closing high-priority warm and hot deals.
+
+//     Identify specific high-value leads and outline actions to close them.
+
+//     Develop a strategy to re-engage lost deals with high potential.
+
+//     Optimizing Lead Conversion (Next 30 Days)
+
+//     Identify weak-performing lead sources and suggest improvements.
+
+//     Strengthen existing client and referral programs to drive revenue.
+
+//     Strategic Growth Actions (Next 60-90 Days)
+
+//     Identify key regions contributing to revenue and recommend expansion strategies.
+
+//     Evaluate campaign performance and recommend adjustments.
+
+//     Sales Process Optimization
+
+//     Implement AI-driven sales automation and personalized follow-ups.
+
+//     Introduce weekly pipeline reviews and deal-tracking dashboards.
+
+//     Final Expected Outcomes (Next 3 Months)
+
+//     Predict revenue impact based on successful execution of the above actions.
+
+//     Provide estimated targets for deal closures, recovered revenue, and improved conversions.
+
+//     Ensure the response is data-driven, structured, and provides actionable recommendations`;
+
+//   const messages = [
+//     {
+//       role: "user",
+//       content: `Context: ${JSON.stringify(
+//         crmData
+//       )}\nBased on the above context, execute the following instructions: ${aiPrompt}`,
+//     },
+//   ];
+
+//   const aiResponse = await completions(messages);
+//   const aiResponseText = String(aiResponse.data?.data || aiResponse.data);
+//   const emailBody = aiResponseText.replace(/^Subject:.*?\n\n/, "").trim();
+
+//   console.log("AI Response:", JSON.stringify(aiResponse, null, 2));
+//   const formattedHtml = `
+//     <!DOCTYPE html>
+//     <html>
+//       <head>
+//           <title>Sales Action Plan</title>
+//           <style>
+//               body {
+//                   font-family: 'Poppins', sans-serif;
+//                   line-height: 1.8;
+//                   color: #333;
+//                   max-width: 900px;
+//                   margin: 40px auto;
+//                   padding: 20px;
+//                   background-color: #f9fafb;
+//               }
+
+//               h1 {
+//                   color: #2c3e50;
+//                   border-bottom: 4px solid #3498db;
+//                   padding-bottom: 12px;
+//                   margin-bottom: 30px;
+//                   font-size: 28px;
+//                   text-transform: uppercase;
+//               }
+
+//               h2 {
+//                   color: #1a5276;
+//                   margin-top: 30px;
+//                   font-size: 22px;
+//                   padding-bottom: 8px;
+//                   border-left: 5px solid #3498db;
+//                   padding-left: 12px;
+//                   background: #ecf0f1;
+//                   border-radius: 6px;
+//               }
+
+//               .section {
+//                   background: #ffffff;
+//                   border-left: 8px solid #3498db;
+//                   padding: 20px;
+//                   margin-bottom: 25px;
+//                   border-radius: 6px;
+//                   box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.1);
+//                   transition: transform 0.2s ease-in-out;
+//               }
+
+//               .section:hover {
+//                   transform: scale(1.02);
+//               }
+
+//               ul {
+//                   padding-left: 25px;
+//               }
+
+//               li {
+//                   margin-bottom: 10px;
+//                   font-size: 16px;
+//                   color: #2c3e50;
+//               }
+
+//               .important {
+//                   font-weight: bold;
+//                   color: #d35400;
+//                   font-size: 17px;
+//               }
+
+//               .kpi {
+//                   background: #e3f2fd;
+//                   padding: 12px;
+//                   border-radius: 6px;
+//                   margin-top: 12px;
+//                   font-weight: bold;
+//                   color: #1a5276;
+//                   text-align: center;
+//                   font-size: 18px;
+//               }
+
+//           </style>
+//       </head>
+//       <body>
+//           <h1>Sales Action Plan</h1>
+//           ${formatTextToHtml(emailBody)}
+//       </body>
+//     </html>
+//   `;
+
+//   return formattedHtml;
+// };
+
+// function formatTextToHtml(text) {
+//   const sections = text.split(/\n\s*\n/).filter((s) => s.trim());
+
+//   let html = "";
+//   let currentList = false;
+
+//   sections.forEach((section) => {
+//     if (section.match(/^[A-Za-z\s-]+:\s*$/)) {
+//       if (currentList) {
+//         html += "</ul>";
+//         currentList = false;
+//       }
+//       const headingText = section.replace(/:\s*$/, "").trim();
+//       html += `<h2>${headingText}</h2>`;
+//     }
+//     else if (section.match(/^-\s/)) {
+//       if (!currentList) {
+//         html += "<ul>";
+//         currentList = true;
+//       }
+//       const itemText = section.replace(/^- /, "").trim();
+//       html += `<li>${itemText}</li>`;
+//     }
+//     else {
+//       if (currentList) {
+//         html += "</ul>";
+//         currentList = false;
+//       }
+//       html += `<p>${section.replace(/\n/g, "<br>")}</p>`;
+//     }
+//   });
+
+//   if (currentList) {
+//     html += "</ul>";
+//   }
+
+//   return html;
+// }
