@@ -810,7 +810,7 @@ export const main = async () => {
   // console.log("PROMPT", emailBody);
   // console.log("promptForDateFilter", promptForDateFilter);
   // console.log("promptForTender", promptForTender);
-  console.log(combinedEmailBody);
+  // console.log(combinedEmailBody);
 
   // Sending the first email
   sendMail(
