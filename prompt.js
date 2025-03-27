@@ -288,7 +288,6 @@ export const generateSpecificSourcePrompt = async () => {
   const specificSourceData = await fetchTenderSpecificData();
   const fetchTenderPreQuotes = await fetchTenderPreQuotesData();
   // console.log("FETCH TENDER PRE QUOTES DATA",fetchTenderPreQuotes);
-  console.log("Specific Source Data", specificSourceData);
 
   const todayDate = getCurrentDate();
 
@@ -876,16 +875,30 @@ export const generatePrompt = async () => {
   // Filter leads with status "Closed Lost" or "Closed No Decision"
   const closedLostOrNoDecisionLeads = crmData.leads.filter(
     (lead) =>
-      lead.stage === "Closed  Lost" || lead.stage === "Closed No Decision"
+      lead.stage === "Closed  Lost" ||
+      lead.stage === "Closed No Decision" ||
+      lead.stage === "Closed (Rejected)"
+  );
+
+  const closedWonLeads = crmData.leads.filter(
+    (lead) => lead.stage === "Closed Won"
   );
 
   const activeLeads = crmData.leads.filter(
     (lead) =>
-      lead.stage !== "Closed  Lost" && lead.stage !== "Closed No Decision"
+      lead.stage !== "Closed  Lost" &&
+      lead.stage !== "Closed No Decision" &&
+      lead.stage !== "Closed (Rejected)"
   );
 
   const totalClosedLostOrNoDecisionDealSize =
     closedLostOrNoDecisionLeads.reduce(
+      (sum, lead) => sum + (parseFloat(lead.oppValue) || 0),
+      0
+    );
+
+    const totalClosedWonDealSize =
+    closedWonLeads.reduce(
       (sum, lead) => sum + (parseFloat(lead.oppValue) || 0),
       0
     );
@@ -903,6 +916,14 @@ export const generatePrompt = async () => {
     }
   )}`;
 
+  const formattedTotalClosedWonDealSize = `$${totalClosedWonDealSize.toLocaleString(
+    "en-US",
+    {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }
+  )}`;
+
   const formattedTotalActiveDealSize = `$${totalActiveDealSize.toLocaleString(
     "en-US",
     {
@@ -910,6 +931,39 @@ export const generatePrompt = async () => {
       maximumFractionDigits: 2,
     }
   )}`;
+
+  const closedWinTable = closedWonLeads
+    .map((lead) => {
+      let statusClass = "";
+      if (lead.status === "Cold") statusClass = "cold";
+      else if (lead.status === "Hot") statusClass = "hot";
+      else if (lead.status === "Warm") statusClass = "warm";
+      else if (lead.status === "N/A" || "Default") statusClass = "na";
+
+      return `<tr>
+          <td style="padding: 12px; text-align: left;">
+  <a href="https://webspiders-force.monday.com/boards/1964391477/pulses/${
+    lead.id
+  }" 
+     target="_blank" 
+     style="color: #007bff; text-decoration: none; font-weight: bold;">
+    ${lead.name}
+  </a>
+</td>
+          <td style="padding: 12px; text-align: left;">${lead.company}</td>
+          <td style="padding: 12px; text-align: left;">${lead.stage}</td>
+          <td style="padding: 12px; text-align: left;" class="${statusClass}">${
+        lead.status
+      }</td>
+          <td style="padding: 12px; text-align: left;">${formatDealSize(
+            lead.oppValue
+          )}</td>
+          <td style="padding: 12px 20px; text-align: left; font-size: 12px; color: #555; min-width: 180px;">${
+            lead.comments
+          }</td>
+        </tr>`;
+    })
+    .join("");
 
   // Table for Closed Lost or Closed No Decision leads
   const closedLostOrNoDecisionTable = closedLostOrNoDecisionLeads
@@ -1126,6 +1180,9 @@ export const generatePrompt = async () => {
         font-weight: bold;
         animation: pulseNA 1.5s infinite;
       }
+        .closed-won-deals{
+         background-color: #d4edda; 
+        }
         h3 {
   font-size: 22px;
   text-align: center;
@@ -1234,7 +1291,7 @@ td {
 </div>
 
 <div class="deals-container closed-deals">
-  <h4>Closed Deals(Lost/No Decision)</h4>
+  <h4>Closed Deals(Lost/No Decision/Rejected)</h4>
   <table>
     <tr>
       <th>Lead Name</th>
@@ -1250,6 +1307,27 @@ td {
         <tr>
           <td><strong>Total Deal Size</strong></td>
           <td><strong>${formattedTotalClosedLostOrNoDecisionDealSize}</strong></td>
+        </tr>
+      </table>
+</div>
+
+<div class="deals-container closed-won-deals">
+  <h4>Closed Won Deals</h4>
+  <table>
+    <tr>
+      <th>Lead Name</th>
+      <th>Company</th>
+      <th>Stage</th>
+      <th>Status</th>
+      <th>Deal Size (Converted to $)</th>
+      <th>Comments(Activity)</th>
+    </tr>
+    ${closedWinTable}
+  </table>
+  <table class="summary-table">
+        <tr>
+          <td><strong>Total Deal Size</strong></td>
+          <td><strong>${formattedTotalClosedWonDealSize}</strong></td>
         </tr>
       </table>
 </div>
@@ -1376,42 +1454,41 @@ td {
 
 export const aiGenerateData = async () => {
   const crmData = await fetchCRMData();
-  console.log(crmData);
   const aiPrompt = `You are an expert Sales Director analyzing a CRM report for SpiderX.ai. The report contains details on the sales pipeline, lead sources, deal values, and lost opportunities. Based on {{this_report}}, generate a comprehensive Sales Action Plan with the following structure:
 
-    Immediate Revenue-Boosting Actions (Next 7-14 Days)
+Immediate Revenue-Boosting Actions (Next 7-14 Days)
 
-    Focus on closing high-priority warm and hot deals.
+Focus on closing high-priority warm and hot deals.
 
-    Identify specific high-value leads and outline actions to close them.
+Identify specific high-value leads and outline actions to close them.
 
-    Develop a strategy to re-engage lost deals with high potential.
+Develop a strategy to re-engage lost deals with high potential.
 
-    Optimizing Lead Conversion (Next 30 Days)
+Optimizing Lead Conversion (Next 30 Days)
 
-    Identify weak-performing lead sources and suggest improvements.
+Identify weak-performing lead sources and suggest improvements.
 
-    Strengthen existing client and referral programs to drive revenue.
+Strengthen existing client and referral programs to drive revenue.
 
-    Strategic Growth Actions (Next 60-90 Days)
+Strategic Growth Actions (Next 60-90 Days)
 
-    Identify key regions contributing to revenue and recommend expansion strategies.
+Identify key regions contributing to revenue and recommend expansion strategies.
 
-    Evaluate campaign performance and recommend adjustments.
+Evaluate campaign performance and recommend adjustments.
 
-    Sales Process Optimization
+Sales Process Optimization
 
-    Implement AI-driven sales automation and personalized follow-ups.
+Implement AI-driven sales automation and personalized follow-ups.
 
-    Introduce weekly pipeline reviews and deal-tracking dashboards.
+Introduce weekly pipeline reviews and deal-tracking dashboards.
 
-    Final Expected Outcomes (Next 3 Months)
+Final Expected Outcomes (Next 3 Months)
 
-    Predict revenue impact based on successful execution of the above actions.
+Predict revenue impact based on successful execution of the above actions.
 
-    Provide estimated targets for deal closures, recovered revenue, and improved conversions.
+Provide estimated targets for deal closures, recovered revenue, and improved conversions.
 
-    Ensure the response is data-driven, structured, and provides actionable recommendations`;
+Ensure the response is data-driven, structured, and provides actionable recommendations.`;
 
   const messages = [
     {
@@ -1426,7 +1503,6 @@ export const aiGenerateData = async () => {
   const aiResponseText = String(aiResponse.data?.data || aiResponse.data);
   const emailBody = aiResponseText.replace(/^Subject:.*?\n\n/, "").trim();
 
-  console.log("AI Response:", JSON.stringify(aiResponse, null, 2));
   // Convert plain text to HTML format
   const formattedHtml = `
     <!DOCTYPE html>

@@ -64,9 +64,6 @@ export const fetchCRMData = async () => {
       hasMore = !!cursor;
     }
 
-    console.log(`✅ Fetched ${allItems.length} items from board ${BOARD_ID}`);
-
-
     const excludedSources = [
       "Tender"
     ];
@@ -108,7 +105,7 @@ export const fetchCRMData = async () => {
         "N/A",
       campaignName:
         deal.column_values.find((col) => col.id === "text_mkncshyb")?.text ||
-        "Others - Website Organic, Calendly",
+        "Others - Website Organic, Calendly, Event App",
       country:
         deal.column_values.find((col) => col.id === "country_mknzs6a9")?.text ||
         "N/A",
@@ -357,7 +354,6 @@ export const fetchLatestLeadsByDate = async () => {
 
   try {
     while (hasMore) {
-      console.log(`🔍 Fetching batch with cursor: ${cursor || "null"}`);
 
       const query = `
         query {
@@ -554,8 +550,6 @@ export const fetchTenderSpecificData = async () => {
         }
       );
 
-      console.log("RESPONSE", response.data.data);
-
       const items = response.data?.data?.boards?.[0]?.items_page?.items || [];
       allItems.push(...items);
       cursor = response.data?.data?.boards?.[0]?.items_page?.cursor;
@@ -727,7 +721,7 @@ export const fetchTenderPreQuotesData = async () => {
           ?.text || "N/A",
       campaignName:
         deal.column_values.find((col) => col.id === "text_mkncshyb")?.text ||
-        "Others - Website Organic, Calendly",
+        "Others - Website Organic, Calendly, Event App",
       country:
         deal.column_values.find((col) => col.id === "country_mknzs6a9")?.text ||
         "N/A",
@@ -807,7 +801,10 @@ export const main = async () => {
 
   const combinedEmailBody = `${emailBody} <br><br> <hr> <br><br> ${prompt}`;
 
-  // console.log("PROMPT", emailBody);
+  fs.writeFile('prompt.txt', prompt, (err) => {
+    if (err) throw err;
+    console.log('File has been saved!');
+  });
   // console.log("promptForDateFilter", promptForDateFilter);
   // console.log("promptForTender", promptForTender);
   // console.log(combinedEmailBody);
