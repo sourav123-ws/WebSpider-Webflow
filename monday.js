@@ -13,10 +13,15 @@ import axios from "axios";
 import dotenv from "dotenv";
 import { getTimeOfDay } from "./utils.js";
 dotenv.config();
+import dayjs from "dayjs";
 
 const MONDAY_API_KEY = process.env.MONDAY_API_KEY;
 const BOARD_ID = 1944965797;
 const LEAD_BOARD_ID = 1964391477;
+
+const ninetyDaysAgo = new Date();
+ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+const ninetyDaysAgoFormatted = ninetyDaysAgo.toISOString().split("T")[0];
 
 export const fetchCRMData = async () => {
   let allItems = [];
@@ -96,10 +101,10 @@ export const fetchCRMData = async () => {
         deal.column_values.find((col) => col.id === "comments_Mjj4ohM0")
           ?.text || "N/A",
       oppValue: parseFloat(
-        deal.column_values
-          .find((col) => col.id === "numeric_mknx4ka9")
-          ?.text?.replace(/,/g, "") || 0
-      ),
+            deal.column_values
+              .find((col) => col.id === "numeric_mknx4ka9")
+              ?.text ?? "0"
+          ),          
       source:
         deal.column_values.find((col) => col.id === "dropdown_mkncv7g")?.text ||
         "N/A",
@@ -121,13 +126,17 @@ export const fetchCRMData = async () => {
         "N/A",
     }));
 
+    structuredLeads = structuredLeads.filter((lead) => {
+     if (lead.date === "N/A") return false;
+      return dayjs(lead.date, "YYYY-MM-DD").isAfter(dayjs(ninetyDaysAgoFormatted, "YYYY-MM-DD"));
+     });
+
     structuredLeads = structuredLeads.filter(
       (lead) => !excludedSources.includes(lead.sourceOfOpportunity)
     );
 
     structuredLeads = structuredLeads
       .sort((a, b) => b.oppValue - a.oppValue)
-      .slice(0, 50);
 
     const structuredData = {
       totalLeads: structuredLeads.length,
@@ -790,11 +799,11 @@ export const main = async () => {
   let subjectForTender;
 
   if (currentHour < 12) {
-    subject = `Top 50 Deals(SpiderX.AI) Summary - ${todayDate} Morning Bulletin - [Preview Mode]`;
+    subject = `Top Deals(SpiderX.AI) Last 90 Days Summery - ${todayDate} Morning Bulletin - [Preview Mode]`;
     subjectForDatePrompt = `Recent 50 Leads(SpiderX.ai) Summary - ${todayDate} Morning Bulletin - [Preview Mode]`;
     subjectForTender = `Recent 50 Tenders Summary - ${todayDate} Morning Bulletin - [Preview Mode]`;
   } else {
-    subject = `Top 50 Deals(SpiderX.AI) Summary - ${todayDate} Evening Bulletin - [Preview Mode]`;
+    subject = `Top Deals(SpiderX.AI) Last 90 Days Summery - ${todayDate} Evening Bulletin - [Preview Mode]`;
     subjectForDatePrompt = `Recent 50 Leads(SpiderX.ai) Summary - ${todayDate} Evening Bulletin - [Preview Mode]`;
     subjectForTender = `Recent 50 Tenders Summary - ${todayDate} Evening Bulletin - [Preview Mode]`;
   }
@@ -805,6 +814,7 @@ export const main = async () => {
     if (err) throw err;
     console.log('File has been saved!');
   });
+
   // console.log("promptForDateFilter", promptForDateFilter);
   // console.log("promptForTender", promptForTender);
   // console.log(combinedEmailBody);
@@ -832,4 +842,5 @@ export const main = async () => {
     subjectForTender,
     "sourav.bhattacherjee@webspiders.com"
   );
+
 };
