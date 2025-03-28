@@ -6,6 +6,7 @@ import {
 } from "./monday.js";
 import yaml from "js-yaml";
 import { completions } from "./openai.js";
+import fs from "fs";
 
 const MONDAY_API_KEY = process.env.MONDAY_API_KEY;
 
@@ -780,6 +781,7 @@ export const generateSpecificSourcePrompt = async () => {
 export const generatePrompt = async () => {
   const crmData = await fetchCRMData();
 
+
   const todayDate = getCurrentDate();
   let crmDataYaml = yaml.dump(crmData);
 
@@ -800,7 +802,7 @@ export const generatePrompt = async () => {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           })
-        : "N/A";
+        : "0.00";
       return `<tr><td style="padding: 12px; text-align: left;">${country}</td>
               <td style="padding: 12px; text-align: left;">${total}</td>
               <td style="padding: 12px; text-align: left;">${formattedValuation}</td></tr>`;
@@ -856,7 +858,6 @@ export const generatePrompt = async () => {
     .join("");
 
   const formatDealSize = (dealSize) => {
-    if (!dealSize || isNaN(dealSize)) return "N/A";
     return parseFloat(dealSize).toLocaleString("en-US", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
@@ -888,7 +889,8 @@ export const generatePrompt = async () => {
     (lead) =>
       lead.stage !== "Closed  Lost" &&
       lead.stage !== "Closed No Decision" &&
-      lead.stage !== "Closed (Rejected)"
+      lead.stage !== "Closed (Rejected)" &&
+      lead.stage !== "Closed Won"
   );
 
   const totalClosedLostOrNoDecisionDealSize =
@@ -1002,6 +1004,7 @@ export const generatePrompt = async () => {
   // Updated detailedLeadsTable with status coloring for N/A
   const detailedLeadsTable = activeLeads
     .map((lead) => {
+      console.log("Lead",lead);
       let statusClass = "";
       if (lead.status === "Cold") statusClass = "cold";
       else if (lead.status === "Hot") statusClass = "hot";
@@ -1045,7 +1048,7 @@ export const generatePrompt = async () => {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           })
-        : "N/A";
+        : "0,00";
 
       return `<tr><td style="padding: 12px; text-align: left;">${source}</td>
               <td style="padding: 12px; text-align: left;">${total}</td>
@@ -1391,67 +1394,6 @@ td {
   return promptExample;
 };
 
-// export const aiGenerateData = async()=>{
-//   const crmData = await fetchCRMData();
-//   const aiPrompt = `You are an expert Sales Director analyzing a CRM report for SpiderX.ai. The report contains details on the sales pipeline, lead sources, deal values, and lost opportunities. Based on the provided data, generate a comprehensive Sales Action Plan with the following sections:
-// 1. Immediate Revenue-Boosting Actions (Next 7-14 Days)
-
-//     Focus: Close high-priority warm/hot deals.
-
-//         List specific high-value leads (e.g., Synvergent HealthConnect, Target Recruit) with deal values and assigned reps.
-
-//         Outline concrete actions (e.g., follow-ups within 48 hours, limited-time incentives, AI-driven sequences).
-
-//     Re-engage Lost Deals: Identify 2-3 high-potential lost opportunities with tailored win-back strategies (e.g., discounts, feature demos).
-
-// 2. Optimizing Lead Conversion (Next 30 Days)
-
-//     Weak Lead Sources: Identify underperforming channels (e.g., LinkedIn ads, cold emails) and suggest fixes (e.g., better targeting, refreshed messaging).
-
-//     Client/Referral Programs: Propose 1-2 tactics to boost referrals (e.g., rewards for successful referrals, case study showcases).
-
-// 3. Strategic Growth Actions (Next 60-90 Days)
-
-//     Regional Expansion: Highlight top revenue-generating regions and recommend expansion strategies (e.g., hire local reps, geo-targeted campaigns).
-
-//     Campaign Adjustments: Analyze past campaign performance (e.g., CTR, conversions) and suggest optimizations (e.g., A/B test ad copies, adjust budgets).
-
-// 4. Sales Process Optimization
-
-//     AI Automation: Specify how AI (e.g., SpiderX AI) can automate follow-ups or lead scoring.
-
-//     Pipeline Tracking: Recommend weekly review cadences and dashboard metrics (e.g., deal stage, rep performance).
-
-// 5. Final Expected Outcomes (Next 3 Months)
-
-//     Revenue Impact: Estimate targets (e.g., ‘Close 50% of hot leads → $120K revenue’).
-
-//     KPIs: Define metrics (e.g., 20% increase in referrals, 15% higher conversion from retargeted lost deals).
-
-// Requirements:
-
-//     Be data-driven (use deal values, conversion rates from the CRM).
-
-//     Prioritize actionable steps with clear owners (e.g., ‘Prakash Reddy to lead Synvergent HealthConnect deal’).
-
-//     Structure output with bullet points, headers, and concise language.`
-// const messages=[
-//   {
-//     role: "user",
-//     content: `Context: ${JSON.stringify(crmData)}
-//     Based on the above context, execute the following instructions: ${aiPrompt}`
-//   }
-// ]
-
-//   const aiResponse = await completions( messages);
-//   // console.log("AI RESPONSE",aiResponse);
-//   const aiResponseText = String(aiResponse.data || aiResponse);
-
-//     // Extract email body by removing the subject line
-//     const emailBody = aiResponseText.replace(/^Subject:.*?\n\n/, "").trim();
-//     return emailBody ;
-// }
-
 export const aiGenerateData = async () => {
   const crmData = await fetchCRMData();
   const aiPrompt = `You are an expert Sales Director analyzing a CRM report for SpiderX.ai. The report contains details on the sales pipeline, lead sources, deal values, and lost opportunities. Based on {{this_report}}, generate a comprehensive Sales Action Plan with the following structure:
@@ -1489,6 +1431,9 @@ Predict revenue impact based on successful execution of the above actions.
 Provide estimated targets for deal closures, recovered revenue, and improved conversions.
 
 Ensure the response is data-driven, structured, and provides actionable recommendations.`;
+
+
+fs.writeFileSync("crmData.txt", JSON.stringify(crmData, null, 2), "utf8");
 
   const messages = [
     {
