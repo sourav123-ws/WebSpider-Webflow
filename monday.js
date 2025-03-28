@@ -799,11 +799,11 @@ export const main = async () => {
   let subjectForTender;
 
   if (currentHour < 12) {
-    subject = `Top Deals(SpiderX.AI) Last 90 Days Summery - ${todayDate} Morning Bulletin - [Preview Mode]`;
+    subject = `Top Deals(SpiderX.AI) Last 90 Days Summary - ${todayDate} Morning Bulletin - [Preview Mode]`;
     subjectForDatePrompt = `Recent 50 Leads(SpiderX.ai) Summary - ${todayDate} Morning Bulletin - [Preview Mode]`;
     subjectForTender = `Recent 50 Tenders Summary - ${todayDate} Morning Bulletin - [Preview Mode]`;
   } else {
-    subject = `Top Deals(SpiderX.AI) Last 90 Days Summery - ${todayDate} Evening Bulletin - [Preview Mode]`;
+    subject = `Top Deals(SpiderX.AI) Last 90 Days Summary - ${todayDate} Evening Bulletin - [Preview Mode]`;
     subjectForDatePrompt = `Recent 50 Leads(SpiderX.ai) Summary - ${todayDate} Evening Bulletin - [Preview Mode]`;
     subjectForTender = `Recent 50 Tenders Summary - ${todayDate} Evening Bulletin - [Preview Mode]`;
   }
