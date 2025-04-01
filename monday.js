@@ -854,5 +854,4 @@ export const main = async () => {
     ["dipesh.majumder@webspiders.com"],
     ["sourav.bhattacherjee@webspiders.com","deepsubhra.ganguly@webspiders.com","man.mohan@webspiders.com"]
   );
-
 };
