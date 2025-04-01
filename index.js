@@ -40,9 +40,10 @@ app.get("/run-cron", async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     console.error("❌ Error during cron job execution:", error);
-    res.status(500).json({ success: false, error: error.message }); // Return error response
+    res.status(500).json({ success: false, error: error.message });
   }
 });
+
 
 
 app.listen(PORT, "0.0.0.0", () => {

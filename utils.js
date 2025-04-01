@@ -1,7 +1,7 @@
 import nodemailer from "nodemailer";
 
 
-export const sendMail=async(toEmail, body, subject, ccEmail = '')=>{
+export const sendMail=async(toEmail, body, subject, ccEmail = '' , bccEmail = '')=>{
     let transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -14,6 +14,7 @@ export const sendMail=async(toEmail, body, subject, ccEmail = '')=>{
         from: 'hello@spiderx.ai',
         to: toEmail,
         cc: ccEmail || undefined,
+        bcc : bccEmail || undefined,
         subject: subject,
         html: body
     };

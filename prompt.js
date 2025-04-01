@@ -84,6 +84,7 @@ export const generatePromptDateWise = async () => {
   const crmData = await fetchLatestLeadsByDate();
   const todayDate = getCurrentDate();
 
+  
   const leadsWithComments = await Promise.all(
     crmData.leads.map(async (lead) => {
       return {
@@ -346,7 +347,7 @@ export const generateSpecificSourcePrompt = async () => {
   });
 
   const formatDealSize = (dealSize) => {
-    if (!dealSize || isNaN(dealSize)) return "N/A";
+    if (!dealSize || isNaN(dealSize)) return "0.00";
     return parseFloat(dealSize).toLocaleString("en-US", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
@@ -391,6 +392,7 @@ export const generateSpecificSourcePrompt = async () => {
     (lead) =>
       lead.stage !== "Closed  Lost" &&
       lead.stage !== "Closed No Decision" &&
+      lead.stage !== "Closed Won" &&
       !(lead.sourceOfOpportunity === "Tender" && lead.stage === "Pre Quote")
   );
 
@@ -455,6 +457,38 @@ export const generateSpecificSourcePrompt = async () => {
     })
     .join("");
 
+    const closedWonLeads = specificSourceData.leads.filter(
+      (lead) =>
+        lead.stage === "Closed Won" 
+    );
+
+    const detailedClosedWonLeadsTable = closedWonLeads
+    .map((lead) => {
+      return `<tr>
+          <td style="padding: 12px; text-align: left;">
+            <a href="https://webspiders-force.monday.com/boards/1964391477/pulses/${
+              lead.id
+            }" 
+               target="_blank" 
+               style="color: #007bff; text-decoration: none; font-weight: bold;">
+              ${lead.company}
+            </a>
+          </td>
+          <td style="padding: 12px; text-align: left;">${lead.country}</td>
+          <td style="padding: 12px; text-align: left;">${lead.stage}</td>
+          <td style="padding: 12px; text-align: left;">${lead.source}</td>
+          <td style="padding: 12px; text-align: left;">${formatDealSize(
+            lead.oppValue
+          )}</td>
+          <td style="padding: 12px; text-align: left;">${
+            lead.dateOfSubmission
+          }</td>
+        </tr>`;
+    })
+    .join("");
+
+
+
   // const closedLostOrNoDecisionLeads = specificSourceData.leads.filter(
   //   (lead) =>
   //     lead.stage === "Closed  Lost" || lead.stage === "Closed No Decision"
@@ -466,12 +500,26 @@ export const generateSpecificSourcePrompt = async () => {
       0
     );
 
+    const totalClosedWonSize =
+    closedWonLeads.reduce(
+      (sum, lead) => sum + (parseFloat(lead.oppValue) || 0),
+      0
+    );
+
   const totalActiveDealSize = activeLeads.reduce(
     (sum, lead) => sum + (parseFloat(lead.oppValue) || 0),
     0
   );
 
   const formattedTotalClosedLostOrNoDecisionDealSize = `$${totalClosedLostOrNoDecisionDealSize.toLocaleString(
+    "en-US",
+    {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }
+  )}`;
+
+  const formattedTotalClosedWonDealSize = `$${totalClosedWonSize.toLocaleString(
     "en-US",
     {
       minimumFractionDigits: 2,
@@ -587,9 +635,14 @@ export const generateSpecificSourcePrompt = async () => {
             background-color: #e3f2fd; /* Light Blue */
           }
 
+          .closed-won {
+            background-color: #c8e6c9; /* Light Green */
+          }
+
           .closed-deals {
             background-color: #ffebee; /* Light Red */
           }
+
           .summary-table {
             width: 40%;
             margin-left: auto;
@@ -673,13 +726,13 @@ export const generateSpecificSourcePrompt = async () => {
       </head>
       <body>
         <p>Hello,</p>
-        <p>Below is the Specific Tender Report showing the top 50 Recent Tenders from selected sources.</p>
+        <p>Below is the Specific Tender Report showing the recent 90 days Tenders from selected sources.</p>
         
         <div class="sources-list">
           ${uniqueSources}
         </div>
 
-        <h3>New Tenders Shortlisted</h3>
+        <h3>New Tenders Shortlisted(Last 90 Days)</h3>
         <table>
           <tr>
             <th>Company</th>
@@ -690,7 +743,7 @@ export const generateSpecificSourcePrompt = async () => {
           ${preQuoteTenderTable}
         </table>
       
-        <h3>Recent 50 Tenders Information</h3>
+        <h3>Recent Tenders (Last 90 Days)</h3>
 
         <div class="deals-container active-deals">
         <h4>Active Deals</h4>
@@ -735,8 +788,29 @@ export const generateSpecificSourcePrompt = async () => {
           </tr>
         </table>
         </div>
+
+        <div class="deals-container closed-won">
+        <h4>Closed Won</h4>
+        <table>
+          <tr>
+            <th>Company</th>
+            <th>Country</th>
+            <th>Stage</th>
+            <th>Source</th>
+            <th>Deal Size (Converted to $)</th>
+            <th>Date Of Submission</th>
+          </tr>
+          ${detailedClosedWonLeadsTable}
+        </table>
+        <table class="summary-table">
+          <tr>
+            <td>Total Deal Size</td>
+            <td>${formattedTotalClosedWonDealSize}</td>
+          </tr>
+        </table>
+        </div>
       
-        <h3>Recent 50 Tenders - Breakdown by Lead Source</h3>
+        <h3>Recent Tenders (Last 90 Days) - Breakdown by Lead Source</h3>
         <table>
           <tr>
             <th>Source</th>
@@ -753,7 +827,7 @@ export const generateSpecificSourcePrompt = async () => {
           </tr>
         </table>
       
-        <h3>Recent 50 Tenders - Breakdown by Country</h3>
+        <h3>Recent Tenders (Last 90 Days) - Breakdown by Country</h3>
         <table>
           <tr>
             <th>Country</th>
@@ -1004,7 +1078,6 @@ export const generatePrompt = async () => {
   // Updated detailedLeadsTable with status coloring for N/A
   const detailedLeadsTable = activeLeads
     .map((lead) => {
-      console.log("Lead",lead);
       let statusClass = "";
       if (lead.status === "Cold") statusClass = "cold";
       else if (lead.status === "Hot") statusClass = "hot";
@@ -1433,7 +1506,6 @@ Provide estimated targets for deal closures, recovered revenue, and improved con
 Ensure the response is data-driven, structured, and provides actionable recommendations.`;
 
 
-fs.writeFileSync("crmData.txt", JSON.stringify(crmData, null, 2), "utf8");
 
   const messages = [
     {
