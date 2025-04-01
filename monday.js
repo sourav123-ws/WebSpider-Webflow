@@ -414,8 +414,7 @@ export const fetchLatestLeadsByDate = async () => {
         "N/A";
 
       const finalDate = createdDate !== '' ? createdDate : fallbackDate;
-      
-
+    
       return {
         id: deal.id || "N/A",
         name: deal.column_values.find((col) => col.id === "name")?.text || "N/A",
@@ -524,6 +523,9 @@ export const fetchTenderSpecificData = async () => {
   let allItems = [];
   let cursor = null;
   let hasMore = true;
+  const today = new Date();
+  const ninetyDaysAgo = new Date();
+  ninetyDaysAgo.setDate(today.getDate() - 90);
 
   try {
     while (hasMore) {
@@ -599,19 +601,21 @@ export const fetchTenderSpecificData = async () => {
         campaignName: deal.column_values.find((col) => col.id === "text_mkncshyb")?.text || "Others - Website Organic, Calendly",
         country: deal.column_values.find((col) => col.id === "country_mknzs6a9")?.text || "N/A",
         sourceOfOpportunity: deal.column_values.find((col) => col.id === "source_of_opportunity_Mjj45Qma")?.text || "N/A",
-        expectedCloseDate: deal.column_values.find((col) => col.id === "deal_expected_close_date")?.text || "N/A",
+        expectedCloseDate: deal.column_values.find((col) => col.id === "deal_expected_close_date")?.text || 0,
         lastActivityDate: deal.column_values.find((col) => col.id === "date_mkna3qt1")?.text || "N/A",
         dateOfSubmission: deal.column_values.find((col) => col.id === "submission_date_Mjj4fLpB")?.text || "N/A",
       };
     });
 
     // Filter to INCLUDE the specified sources
-    structuredLeads = structuredLeads.filter((lead) => includedSources.includes(lead.sourceOfOpportunity));
+    structuredLeads = structuredLeads.filter(
+      (lead) =>
+        includedSources.includes(lead.sourceOfOpportunity) &&
+        lead.date !== "N/A" &&
+        new Date(lead.date) >= ninetyDaysAgo
+    );
 
-    // Sort by date (descending) and limit to 50
-    structuredLeads = structuredLeads
-      .sort((a, b) => new Date(b.date) - new Date(a.date))
-      .slice(0, 50);
+    structuredLeads = structuredLeads.sort((a, b) => new Date(b.date) - new Date(a.date));
 
     const structuredData = {
       totalLeads: structuredLeads.length,
@@ -645,6 +649,9 @@ export const fetchTenderPreQuotesData = async () => {
   let allItems = [];
   let cursor = null;
   let hasMore = true;
+  const today = new Date();
+  const ninetyDaysAgo = new Date();
+  ninetyDaysAgo.setDate(today.getDate() - 90);
 
   try {
     while (hasMore) {
@@ -759,7 +766,10 @@ export const fetchTenderPreQuotesData = async () => {
 
     structuredLeads = structuredLeads.filter(
       (lead) =>
-        lead.sourceOfOpportunity === "Tender" && lead.stage === "Pre Quote"
+        lead.sourceOfOpportunity === "Tender" &&
+        lead.stage === "Pre Quote" &&
+        lead.date !== null &&
+        lead.date >= ninetyDaysAgo
     );
 
     return structuredLeads;
@@ -801,16 +811,16 @@ export const main = async () => {
   if (currentHour < 12) {
     subject = `Top Deals(SpiderX.AI) Last 90 Days Summary - ${todayDate} Morning Bulletin - [Preview Mode]`;
     subjectForDatePrompt = `Recent 50 Leads(SpiderX.ai) Summary - ${todayDate} Morning Bulletin - [Preview Mode]`;
-    subjectForTender = `Recent 50 Tenders Summary - ${todayDate} Morning Bulletin - [Preview Mode]`;
+    subjectForTender = `Last 90 Days Tenders Summary - ${todayDate} Morning Bulletin - [Preview Mode]`;
   } else {
     subject = `Top Deals(SpiderX.AI) Last 90 Days Summary - ${todayDate} Evening Bulletin - [Preview Mode]`;
     subjectForDatePrompt = `Recent 50 Leads(SpiderX.ai) Summary - ${todayDate} Evening Bulletin - [Preview Mode]`;
-    subjectForTender = `Recent 50 Tenders Summary - ${todayDate} Evening Bulletin - [Preview Mode]`;
+    subjectForTender = `Last 90 Days Tenders Summary - ${todayDate} Evening Bulletin - [Preview Mode]`;
   }
 
   const combinedEmailBody = `${emailBody} <br><br> <hr> <br><br> ${prompt}`;
 
-  fs.writeFile('prompt.txt', prompt, (err) => {
+  fs.writeFile('promptForTender.txt', promptForTender, (err) => {
     if (err) throw err;
     console.log('File has been saved!');
   });
@@ -819,28 +829,30 @@ export const main = async () => {
   // console.log("promptForTender", promptForTender);
   // console.log(combinedEmailBody);
 
-  // Sending the first email
   sendMail(
-    ["presalesgroup@webspiders.com","dipesh.majumder@webspiders.com"],
+    ["presalesgroup@webspiders.com"],
     combinedEmailBody,
     subject,
-    "sourav.bhattacherjee@webspiders.com"
+    ["dipesh.majumder@webspiders.com"],
+    ["sourav.bhattacherjee@webspiders.com","deepsubhra.ganguly@webspiders.com","man.mohan@webspiders.com"]
   );
 
-  // // // Sending the second email
+  // // Sending the second email
   sendMail(
-    ["presalesgroup@webspiders.com","dipesh.majumder@webspiders.com"],
+    ["presalesgroup@webspiders.com"],
     promptForDateFilter,
     subjectForDatePrompt,
-    "sourav.bhattacherjee@webspiders.com"
+    ["dipesh.majumder@webspiders.com"],
+    ["sourav.bhattacherjee@webspiders.com","deepsubhra.ganguly@webspiders.com","man.mohan@webspiders.com"]
   );
 
   // // // Sending the third email with promptForTender
   sendMail(
-    ["presalesgroup@webspiders.com","dipesh.majumder@webspiders.com"],
+    ["presalesgroup@webspiders.com"] ,
     promptForTender,
     subjectForTender,
-    "sourav.bhattacherjee@webspiders.com"
+    ["dipesh.majumder@webspiders.com"],
+    ["sourav.bhattacherjee@webspiders.com","deepsubhra.ganguly@webspiders.com","man.mohan@webspiders.com"]
   );
 
 };
