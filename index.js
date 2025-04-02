@@ -6,6 +6,7 @@ import { main } from "./monday.js";
 import { managerScoreValue, mondayWebhooks } from "./controllers/monday-webhooks.js";
 import { getRecruitmentDetails, webflowWebhooks } from "./controllers/webflow-webhooks.js";
 import cron from "node-cron";
+import { fetchAndSaveLatestCallsToMonday, fetchAndSaveLatestJulyCallsToMonday, insertThroughWebhook } from "./controllers/voice-records.js";
 dotenv.config();
 
 const app = express();
@@ -30,6 +31,9 @@ app.post("/webflow-webhook",webflowWebhooks);
 app.post("/monday-webhook",mondayWebhooks);
 app.post("/get-recruitment-details",getRecruitmentDetails)
 app.post("/manage-score-value",managerScoreValue);
+app.post("fetch-save-vodafone-calls",fetchAndSaveLatestCallsToMonday);
+app.post("/fetch-save-july-calls",fetchAndSaveLatestJulyCallsToMonday);
+app.post("/insert-through-webhook", insertThroughWebhook)
 
 app.get("/run-cron", async (req, res) => {
   console.log("🚀 Running cron job...");
@@ -43,7 +47,6 @@ app.get("/run-cron", async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
-
 
 
 app.listen(PORT, "0.0.0.0", () => {
