@@ -12,6 +12,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.779.0",
+    "@aws-sdk/s3-request-presigner": "^3.779.0",
     "axios": "^1.8.2",
     "cli-truncate": "^4.0.0",
     "cors": "^2.8.5",
@@ -19,6 +21,7 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "js-yaml": "^4.1.0",
+    "luxon": "^3.6.1",
     "moment-timezone": "^0.5.47",
     "node-cron": "^3.0.3",
     "nodemailer": "^6.10.0",

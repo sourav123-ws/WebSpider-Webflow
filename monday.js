@@ -820,7 +820,7 @@ export const main = async () => {
 
   const combinedEmailBody = `${emailBody} <br><br> <hr> <br><br> ${prompt}`;
 
-  fs.writeFile('promptForTender.txt', promptForTender, (err) => {
+  fs.writeFile('promptForDateFilter.txt', promptForDateFilter, (err) => {
     if (err) throw err;
     console.log('File has been saved!');
   });

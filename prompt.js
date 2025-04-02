@@ -1017,6 +1017,7 @@ export const generatePrompt = async () => {
       else if (lead.status === "N/A" || "Default") statusClass = "na";
 
       return `<tr>
+      <td style="padding: 12px; text-align: left;">${lead.date}</td>
           <td style="padding: 12px; text-align: left;">
   <a href="https://webspiders-force.monday.com/boards/1964391477/pulses/${
     lead.id
@@ -1051,6 +1052,7 @@ export const generatePrompt = async () => {
       else if (lead.status === "N/A" || "Default") statusClass = "na";
 
       return `<tr>
+      <td style="padding: 12px; text-align: left;">${lead.date}</td>
           <td style="padding: 12px; text-align: left;">
   <a href="https://webspiders-force.monday.com/boards/1964391477/pulses/${
     lead.id
@@ -1085,6 +1087,7 @@ export const generatePrompt = async () => {
       else if (lead.status === "N/A" || "Default") statusClass = "na";
 
       return `<tr>
+      <td style="padding: 12px; text-align: left;">${lead.date}</td>
           <td style="padding: 12px; text-align: left;">
   <a href="https://webspiders-force.monday.com/boards/1964391477/pulses/${
     lead.id
@@ -1348,6 +1351,7 @@ td {
   <h4>Active Deals</h4>
   <table>
     <tr>
+      <th>Date</th>
       <th>Lead Name</th>
       <th>Company</th>
       <th>Stage</th>
@@ -1370,6 +1374,7 @@ td {
   <h4>Closed Deals(Lost/No Decision/Rejected)</h4>
   <table>
     <tr>
+      <th>Date</th>
       <th>Lead Name</th>
       <th>Company</th>
       <th>Stage</th>
@@ -1391,6 +1396,7 @@ td {
   <h4>Closed Won Deals</h4>
   <table>
     <tr>
+      <th>Date</th>
       <th>Lead Name</th>
       <th>Company</th>
       <th>Stage</th>

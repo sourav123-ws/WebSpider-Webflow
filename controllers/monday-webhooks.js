@@ -410,6 +410,7 @@ export const mondayWebhooks = async (req, res) => {
           ? await getMondayColumnValue(boardId, pulseId, TEXT_DATE_COLUMN_ID)
           : value.text || value;
 
+
       if (!dateText || (previousValue && previousValue.text === dateText)) {
         return res
           .status(200)
