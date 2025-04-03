@@ -107,6 +107,7 @@ async function uploadToS3AndGetUrl(fileUrl, bucketName, key) {
     const response = await axios.get(fileUrl, { responseType: "arraybuffer" });
     const fileBuffer = Buffer.from(response.data, "binary");
 
+    // 2. Upload to S3
     const uploadParams = {
       Bucket: bucketName,
       Key: key,
@@ -419,7 +420,7 @@ export const fetchAndSaveLatestJulyCallsToMonday = async () => {
 //webhook function
 
 export const insertThroughWebhook = async (req, res) => {
-  
+  console.log("REQ.BODY", req.body);
   const sanitize = (str) => {
     if (str === null || str === undefined) return "";
     return String(str)
@@ -477,8 +478,6 @@ export const insertThroughWebhook = async (req, res) => {
     console.log(groupId);
     // Generate short summary
     let shortSummary = "N/A";
-    let csatScore = "N/A";
-
     if (summary) {
       const messages = [
         {
@@ -502,23 +501,6 @@ export const insertThroughWebhook = async (req, res) => {
           .split("\n")
           .map((line) => `<strong>${line.trim()}</strong><br>`)
           .join("");
-      }
-    }
-
-
-    const csatMessages = [
-      {
-        role: "system",
-        content: "Extract just the CSAT score (a number between 1-5) from the conversation. Return only the number with no additional text."
-      },
-      { role: "user", content: summary }
-    ];
-
-    const csatResponse = await completions(csatMessages);
-    if (csatResponse.status === 0 && csatResponse.data) {
-      const scoreMatch = csatResponse.data.match(/[1-5]/);
-      if (scoreMatch) {
-        csatScore = scoreMatch[0];
       }
     }
 
@@ -554,7 +536,6 @@ export const insertThroughWebhook = async (req, res) => {
           text_mkpkxzyf: sanitize(convertToEST(endedAt)),
           long_text_mkpmxjcp: sanitize(shortSummary),
           long_text_mkpmy75m: sanitize(summary || "N/A"),
-          text_mkpnfqn9 : `${sanitize(csatScore)}/5`
         };
 
     // Prepare Monday.com API request
