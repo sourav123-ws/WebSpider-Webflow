@@ -470,7 +470,19 @@ export const insertThroughWebhook = async (req, res) => {
 
     // Determine board and group configuration
     const isVodafoneAssistant = ASSISTANT_IDS.includes(assistantId);
+    const isJulyAssistant = assistantId === JULY_ASSISTANT_ID;
+    
+
+    if (!isVodafoneAssistant && !isJulyAssistant) {
+      console.log(`Skipping insertion - assistant ${assistantId} not authorized`);
+      return res.status(200).json({
+        success: true,
+        message: "Skipped - assistant not authorized for any board"
+      });
+    }
+
     const boardId = isVodafoneAssistant ? VODAFONE_BOARD_ID : JULY_BOARD_ID;
+    
     const assistantName = ASSISTANT_NAMES[assistantId] || "Unknown Assistant";
     console.log(assistantName);
     const groupId = isVodafoneAssistant
