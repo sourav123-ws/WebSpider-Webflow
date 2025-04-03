@@ -421,7 +421,6 @@ export const fetchAndSaveLatestJulyCallsToMonday = async () => {
 //webhook function
 
 export const insertThroughWebhook = async (req, res) => {
-  console.log("REQ.BODY", req.body);
   const sanitize = (str) => {
     if (str === null || str === undefined) return "";
     return String(str)
@@ -492,6 +491,7 @@ export const insertThroughWebhook = async (req, res) => {
     // Generate short summary
     let shortSummary = "N/A";
     let csatScore = "N/A";
+    let overallScore = "N/A"
 
     if (summary) {
       const messages = [
@@ -537,6 +537,24 @@ export const insertThroughWebhook = async (req, res) => {
       }
     }
 
+    if (isVodafoneAssistant) {
+      const overallScoreMessages = [ 
+        {
+          role: "system",
+          content: "Analyze the given summary and provide a score from 1 to 10 (10 being best)."
+        },
+        { role: "user", content: summary }
+      ];
+  
+      const overallScoreResponse = await completions(overallScoreMessages);
+      if (overallScoreResponse.status === 0 && overallScoreResponse.data) {
+        const scoreMatch = overallScoreResponse.data.match(/[1-5]/);
+        if (scoreMatch) {
+          overallScore = scoreMatch[0];
+        }
+      }
+    }
+
     // Upload recording if available
     let s3RecordingUrl = "No recording";
     if (recordingUrl) {
@@ -549,6 +567,7 @@ export const insertThroughWebhook = async (req, res) => {
       );
     }
     console.log("`${sanitize(csatScore)}/5`",`${sanitize(csatScore)}/5`);
+    console.log("`${sanitize(overallScore)}/10`",`${sanitize(overallScore)}/10`);
     // Prepare column values based on board type
     const columnValues = isVodafoneAssistant
       ? {
@@ -559,6 +578,7 @@ export const insertThroughWebhook = async (req, res) => {
           text_mkpkcsbe: sanitize(s3RecordingUrl),
           long_text_mkpmq3sq: sanitize(summary || "N/A"),
           long_text_mkpmbyb2: sanitize(shortSummary),
+          text_mkpnxs1n : `${sanitize(overallScore)}/10` || "N/A"
         }
       : {
           name: sanitize(id),
@@ -568,7 +588,7 @@ export const insertThroughWebhook = async (req, res) => {
           text_mkpkxzyf: sanitize(convertToEST(endedAt)),
           long_text_mkpmxjcp: sanitize(shortSummary),
           long_text_mkpmy75m: sanitize(summary || "N/A"),
-          text_mkpnfqn9 : `${sanitize(csatScore)}/5`
+          text_mkpnfqn9 : `${sanitize(csatScore)}/5` || "N/A"
         };
 
     // Prepare Monday.com API request
