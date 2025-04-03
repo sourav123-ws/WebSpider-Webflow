@@ -578,7 +578,7 @@ export const insertThroughWebhook = async (req, res) => {
           text_mkpkcsbe: sanitize(s3RecordingUrl),
           long_text_mkpmq3sq: sanitize(summary || "N/A"),
           long_text_mkpmbyb2: sanitize(shortSummary),
-          text_mkpnxs1n : `${sanitize(overallScore)}/10` || "N/A"
+          text_mkpnxs1n : summary ? `${sanitize(overallScore)}/10` : "N/A"
         }
       : {
           name: sanitize(id),
@@ -588,7 +588,7 @@ export const insertThroughWebhook = async (req, res) => {
           text_mkpkxzyf: sanitize(convertToEST(endedAt)),
           long_text_mkpmxjcp: sanitize(shortSummary),
           long_text_mkpmy75m: sanitize(summary || "N/A"),
-          text_mkpnfqn9 : `${sanitize(csatScore)}/5` || "N/A"
+          text_mkpnfqn9 : summary ? `${sanitize(csatScore)}/5` : "N/A"
         };
 
     // Prepare Monday.com API request
@@ -601,7 +601,8 @@ export const insertThroughWebhook = async (req, res) => {
         board_id: ${boardId},
         item_name: "${sanitize(id)}",
         group_id: "${groupId}",
-        column_values: "${columnValuesStr}"
+        column_values: "${columnValuesStr}" ,
+        position: { top: true }
       ) {
         id
       }
