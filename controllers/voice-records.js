@@ -539,7 +539,6 @@ export const insertThroughWebhook = async (req, res) => {
 
     // Upload recording if available
     let s3RecordingUrl = "No recording";
-    console.log(recordingUrl);
     if (recordingUrl) {
       const folder = isVodafoneAssistant ? "" : "july/";
       const s3Key = `recordings/${folder}${id}.mp3`;
@@ -549,7 +548,7 @@ export const insertThroughWebhook = async (req, res) => {
         s3Key
       );
     }
-
+    console.log("`${sanitize(csatScore)}/5`",`${sanitize(csatScore)}/5`);
     // Prepare column values based on board type
     const columnValues = isVodafoneAssistant
       ? {
