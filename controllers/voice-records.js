@@ -107,7 +107,6 @@ async function uploadToS3AndGetUrl(fileUrl, bucketName, key) {
     const response = await axios.get(fileUrl, { responseType: "arraybuffer" });
     const fileBuffer = Buffer.from(response.data, "binary");
 
-    // 2. Upload to S3
     const uploadParams = {
       Bucket: bucketName,
       Key: key,
