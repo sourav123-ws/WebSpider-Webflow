@@ -9,7 +9,6 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { completions } from "../openai.js";
 import { DateTime } from "luxon";
-import { body } from "../body.js";
 
 const API_URL = "https://api.vapi.ai/call";
 const BEARER_TOKEN = "e89fc400-61a7-48bf-8400-24ba0983f999";
@@ -421,9 +420,7 @@ export const fetchAndSaveLatestJulyCallsToMonday = async () => {
 //webhook function
 
 export const insertThroughWebhook = async (req, res) => {
-  req.body = body ;
-  console.log(req.body);
-
+  
   const sanitize = (str) => {
     if (str === null || str === undefined) return "";
     return String(str)
@@ -549,7 +546,6 @@ export const insertThroughWebhook = async (req, res) => {
           text_mkpkcsbe: sanitize(s3RecordingUrl),
           long_text_mkpmq3sq: sanitize(summary || "N/A"),
           long_text_mkpmbyb2: sanitize(shortSummary),
-          text_mkpnncp5 : `${sanitize(csatScore)}/5`
         }
       : {
           name: sanitize(id),
