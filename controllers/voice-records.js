@@ -20,6 +20,7 @@ const JULY_BOARD_ID = "1994144889";
 const JULY_GROUP_ID = "topics";
 const JULY_ASSISTANT_ID = "4bad36e4-b5a8-4579-acdf-ea712d1ebf2d";
 
+console.log("hello");
 const ASSISTANT_NAMES = {
   "19fdafcc-48ef-4a72-acd5-ac3536e54e34": "Vodafone Coach: Young Adult – Frustrated",
   "4e09ed1b-539e-46e5-93d8-042fe1669cfd": "Middle-Aged – Confused or Agitated",
