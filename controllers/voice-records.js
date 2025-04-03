@@ -9,6 +9,7 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { completions } from "../openai.js";
 import { DateTime } from "luxon";
+import { body } from "../body.js";
 
 const API_URL = "https://api.vapi.ai/call";
 const BEARER_TOKEN = "e89fc400-61a7-48bf-8400-24ba0983f999";
@@ -420,7 +421,9 @@ export const fetchAndSaveLatestJulyCallsToMonday = async () => {
 //webhook function
 
 export const insertThroughWebhook = async (req, res) => {
-  console.log("REQ.BODY", req.body);
+  req.body = body ;
+  console.log(req.body);
+
   const sanitize = (str) => {
     if (str === null || str === undefined) return "";
     return String(str)
@@ -478,6 +481,8 @@ export const insertThroughWebhook = async (req, res) => {
     console.log(groupId);
     // Generate short summary
     let shortSummary = "N/A";
+    let csatScore = "N/A";
+
     if (summary) {
       const messages = [
         {
@@ -504,6 +509,23 @@ export const insertThroughWebhook = async (req, res) => {
       }
     }
 
+
+    const csatMessages = [
+      {
+        role: "system",
+        content: "Extract just the CSAT score (a number between 1-5) from the conversation. Return only the number with no additional text."
+      },
+      { role: "user", content: summary }
+    ];
+
+    const csatResponse = await completions(csatMessages);
+    if (csatResponse.status === 0 && csatResponse.data) {
+      const scoreMatch = csatResponse.data.match(/[1-5]/);
+      if (scoreMatch) {
+        csatScore = scoreMatch[0];
+      }
+    }
+
     // Upload recording if available
     let s3RecordingUrl = "No recording";
     console.log(recordingUrl);
@@ -527,6 +549,7 @@ export const insertThroughWebhook = async (req, res) => {
           text_mkpkcsbe: sanitize(s3RecordingUrl),
           long_text_mkpmq3sq: sanitize(summary || "N/A"),
           long_text_mkpmbyb2: sanitize(shortSummary),
+          text_mkpnncp5 : `${sanitize(csatScore)}/5`
         }
       : {
           name: sanitize(id),
@@ -536,6 +559,7 @@ export const insertThroughWebhook = async (req, res) => {
           text_mkpkxzyf: sanitize(convertToEST(endedAt)),
           long_text_mkpmxjcp: sanitize(shortSummary),
           long_text_mkpmy75m: sanitize(summary || "N/A"),
+          text_mkpnfqn9 : `${sanitize(csatScore)}/5`
         };
 
     // Prepare Monday.com API request
