@@ -482,7 +482,7 @@ export const insertThroughWebhook = async (req, res) => {
     }
 
     const boardId = isVodafoneAssistant ? VODAFONE_BOARD_ID : JULY_BOARD_ID;
-    
+
     const assistantName = ASSISTANT_NAMES[assistantId] || "Unknown Assistant";
     console.log(assistantName);
     const groupId = isVodafoneAssistant
@@ -491,6 +491,8 @@ export const insertThroughWebhook = async (req, res) => {
     console.log(groupId);
     // Generate short summary
     let shortSummary = "N/A";
+    let csatScore = "N/A";
+
     if (summary) {
       const messages = [
         {
@@ -514,6 +516,24 @@ export const insertThroughWebhook = async (req, res) => {
           .split("\n")
           .map((line) => `<strong>${line.trim()}</strong><br>`)
           .join("");
+      }
+    }
+
+    if (isJulyAssistant) {
+      const csatMessages = [ 
+        {
+          role: "system",
+          content: "Extract just the CSAT score (a number between 1-5) from the conversation. Return only the number with no additional text."
+        },
+        { role: "user", content: summary }
+      ];
+  
+      const csatResponse = await completions(csatMessages);
+      if (csatResponse.status === 0 && csatResponse.data) {
+        const scoreMatch = csatResponse.data.match(/[1-5]/);
+        if (scoreMatch) {
+          csatScore = scoreMatch[0];
+        }
       }
     }
 
@@ -549,6 +569,7 @@ export const insertThroughWebhook = async (req, res) => {
           text_mkpkxzyf: sanitize(convertToEST(endedAt)),
           long_text_mkpmxjcp: sanitize(shortSummary),
           long_text_mkpmy75m: sanitize(summary || "N/A"),
+          text_mkpnfqn9 : `${sanitize(csatScore)}/5`
         };
 
     // Prepare Monday.com API request
