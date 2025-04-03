@@ -601,8 +601,7 @@ export const insertThroughWebhook = async (req, res) => {
         board_id: ${boardId},
         item_name: "${sanitize(id)}",
         group_id: "${groupId}",
-        column_values: "${columnValuesStr}" ,
-        position: { top: true }
+        column_values: "${columnValuesStr}" 
       ) {
         id
       }
