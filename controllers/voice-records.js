@@ -554,8 +554,8 @@ export const insertThroughWebhook = async (req, res) => {
     console.log(groupId);
     // Generate short summary
     let shortSummary = "N/A";
-    let csatScore = "0/5";
-    let overallScore = "0/10"
+    let csatScore = "0";
+    let overallScore = "0"
 
     if (summary) {
       const messages = [
@@ -596,7 +596,7 @@ export const insertThroughWebhook = async (req, res) => {
       if (csatResponse.status === 0 && csatResponse.data) {
         const scoreMatch = csatResponse.data.match(/[1-5]/);
         if (scoreMatch) {
-          csatScore = scoreMatch[0];
+          csatScore = scoreMatch[0] / 5;
         }
       }
     }
@@ -612,9 +612,9 @@ export const insertThroughWebhook = async (req, res) => {
   
       const overallScoreResponse = await completions(overallScoreMessages);
       if (overallScoreResponse.status === 0 && overallScoreResponse.data) {
-        const scoreMatch = overallScoreResponse.data.match(/[1-5]/);
+        const scoreMatch = overallScoreResponse.datadata.match(/\b(?:10|[0-9])\b/);
         if (scoreMatch) {
-          overallScore = scoreMatch[0];
+          overallScore = scoreMatch[0]/10;
         }
       }
     }
@@ -630,8 +630,6 @@ export const insertThroughWebhook = async (req, res) => {
         s3Key
       );
     }
-    console.log("`${sanitize(csatScore)}/5`",`${sanitize(csatScore)}/5`);
-    console.log("`${sanitize(overallScore)}/10`",`${sanitize(overallScore)}/10`);
     // Prepare column values based on board type
     const columnValues = isVodafoneAssistant
       ? {
