@@ -596,7 +596,7 @@ export const insertThroughWebhook = async (req, res) => {
       if (csatResponse.status === 0 && csatResponse.data) {
         const scoreMatch = csatResponse.data.match(/[1-5]/);
         if (scoreMatch) {
-          csatScore = scoreMatch[0] / 5;
+          csatScore = `${scoreMatch[0]} / 5`;
         }
       }
     }
@@ -614,7 +614,7 @@ export const insertThroughWebhook = async (req, res) => {
       if (overallScoreResponse.status === 0 && overallScoreResponse.data) {
         const scoreMatch = overallScoreResponse.data;
         if (scoreMatch) {
-          overallScore = scoreMatch[0]/10;
+          overallScore = `${scoreMatch[0]}/10`;
         }
       }
     }
