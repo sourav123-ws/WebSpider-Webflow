@@ -523,7 +523,7 @@ export const insertThroughWebhook = async (req, res) => {
       const csatMessages = [ 
         {
           role: "system",
-          content: "Extract just the CSAT score (a number between 1-5) from the conversation. Return only the number with no additional text."
+          content: "Extract just the CSAT score (a number between 0-5) from the conversation. Return only the number with no additional text.If there is no summary available give them a score of 0"
         },
         { role: "user", content: summary }
       ];
@@ -541,7 +541,7 @@ export const insertThroughWebhook = async (req, res) => {
       const overallScoreMessages = [ 
         {
           role: "system",
-          content: "Analyze the given summary and provide a score from 1 to 10 (10 being best)."
+          content: "Analyze the given summary and provide a score from 0 to 10 (10 being best).If there is no summary available give them a score of 0"
         },
         { role: "user", content: summary }
       ];
@@ -578,7 +578,7 @@ export const insertThroughWebhook = async (req, res) => {
           text_mkpkcsbe: sanitize(s3RecordingUrl),
           long_text_mkpmq3sq: sanitize(summary || "N/A"),
           long_text_mkpmbyb2: sanitize(shortSummary),
-          text_mkpnxs1n : summary ? `${sanitize(overallScore)}/10` : "N/A"
+          text_mkpnxs1n : `${sanitize(overallScore)}/10`
         }
       : {
           name: sanitize(id),
@@ -588,7 +588,7 @@ export const insertThroughWebhook = async (req, res) => {
           text_mkpkxzyf: sanitize(convertToEST(endedAt)),
           long_text_mkpmxjcp: sanitize(shortSummary),
           long_text_mkpmy75m: sanitize(summary || "N/A"),
-          text_mkpnfqn9 : summary ? `${sanitize(csatScore)}/5` : "N/A"
+          text_mkpnfqn9 : `${sanitize(csatScore)}/5`
         };
 
     // Prepare Monday.com API request
