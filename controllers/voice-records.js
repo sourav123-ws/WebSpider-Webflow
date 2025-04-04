@@ -600,7 +600,7 @@ export const insertThroughWebhook = async (req, res) => {
         }
       }
     }
-
+    console.log(csatScore);
     if (isVodafoneAssistant) {
       const overallScoreMessages = [ 
         {
@@ -618,7 +618,7 @@ export const insertThroughWebhook = async (req, res) => {
         }
       }
     }
-
+    console.log(overallScore);
     // Upload recording if available
     let s3RecordingUrl = "No recording";
     if (recordingUrl) {
