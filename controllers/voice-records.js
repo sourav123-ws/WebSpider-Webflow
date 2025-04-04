@@ -612,7 +612,7 @@ export const insertThroughWebhook = async (req, res) => {
   
       const overallScoreResponse = await completions(overallScoreMessages);
       if (overallScoreResponse.status === 0 && overallScoreResponse.data) {
-        const scoreMatch = overallScoreResponse.datadata.match(/\b(?:10|[0-9])\b/);
+        const scoreMatch = overallScoreResponse.data;
         if (scoreMatch) {
           overallScore = scoreMatch[0]/10;
         }
