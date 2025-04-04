@@ -62,6 +62,15 @@ const convertToIST = (utcDate) => {
   });
 };
 
+const formatDate = (datetime) => {
+  const dateObj = new Date(datetime);
+  const year = dateObj.getFullYear();
+  const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const day = String(dateObj.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+
 function convertToEST(dateString) {
   try {
     // Try parsing as ISO format first (UTC)
@@ -187,6 +196,8 @@ const createMondayItem = async (callData) => {
       text_mkpkcsbe: sanitize(s3RecordingUrl),
       long_text_mkpmbyb2: sanitize(callData.shortSummary) || "N/A",
       long_text_mkpmq3sq: sanitize(callData.summary) || "N/A",
+      text_mkpnxs1n : sanitize(callData.overallScore),
+      date_mkpp19pr: { date: formatDate(callData.startedAt) }
     };
 
     // Rest of your function remains the same...
@@ -237,36 +248,48 @@ export const fetchAndSaveLatestCallsToMonday = async () => {
   allCalls.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   if (allCalls.length > 0) {
-    allCalls.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
     for (const call of allCalls) {
       let shortSummary = "N/A";
+      let overallScore = "0/10";
 
       if (call.summary) {
+        // Summarize call using emojis
         const messages = [
           {
             role: "system",
-            content: `Summarize the following call details concisely using numbered points. Ensure each point is clearly separated for readability in Monday.com by using emojis.
-        
+            content: `Summarize the following call details concisely using numbered points. Ensure each point is clearly separated for readability in Monday.com by using emojis like:
             1️⃣ 
             2️⃣ 
-            3️⃣ 
-
-            like that
-        
-            Use these emojis (1️⃣, 2️⃣, 3️⃣) to ensure separation is visually clear in Monday.com.`,
+            3️⃣`,
           },
           { role: "user", content: call.summary },
         ];
 
         const aiResponse = await completions(messages);
         if (aiResponse.status === 0 && aiResponse.data) {
-          // Convert AI response to HTML
           const plainSummary = aiResponse.data;
           shortSummary = plainSummary
-            .split("\n") // Split by new lines
-            .map((line) => `<strong>${line.trim()}</strong><br>`) // Make each line bold with <br>
-            .join(""); // Join as HTML string
+            .split("\n")
+            .map((line) => `<strong>${line.trim()}</strong><br>`)
+            .join("");
+        }
+
+        // Generate overall score
+        const overallScoreMessages = [
+          {
+            role: "system",
+            content:
+              "You are an evaluator. Analyze the provided summary and rate it on a scale of 0 to 10 (10 being the best). Respond only with the number, no explanation. If the summary is empty or not useful, respond with 0.",
+          },
+          { role: "user", content: call.summary },
+        ];
+
+        const overallScoreResponse = await completions(overallScoreMessages);
+        if (overallScoreResponse.status === 0 && overallScoreResponse.data) {
+          const scoreMatch = overallScoreResponse.data.match(/\b(?:10|[0-9])\b/);
+          if (scoreMatch) {
+            overallScore = `${scoreMatch[0]}/10`;
+          }
         }
       }
 
@@ -278,16 +301,27 @@ export const fetchAndSaveLatestCallsToMonday = async () => {
         recordingUrl: call.recordingUrl,
         startingTime: call.startedAt,
         endingTime: call.endedAt,
-        shortSummary: shortSummary,
+        shortSummary,
         summary: call.summary,
+        overallScore,
+        callDate: new Date(call.startedAt).toLocaleString("en-IN", {
+          day: "numeric",
+          month: "numeric",
+          year: "numeric",
+          hour: "numeric",
+          minute: "numeric",
+          second: "numeric",
+          hour12: true,
+        }),
       };
 
       await createMondayItem(callData);
     }
   } else {
-    console.log("❌ No July calls found.");
+    console.log("❌ No calls found.");
   }
 };
+
 
 //inserting july Data
 
@@ -320,6 +354,8 @@ const createJulyMondayItem = async (callData) => {
       text_mkpkxzyf: sanitize(convertToEST(callData.endingTime)),
       long_text_mkpmxjcp: sanitize(callData.shortSummary || "N/A"),
       long_text_mkpmy75m: sanitize(callData.summary || "N/A"),
+      date_mkppvxrc : { date: formatDate(callData.callDate) },
+      text_mkpnfqn9 : callData.csatScore
     };
 
     const columnValuesStr = JSON.stringify(columnValues)
@@ -367,35 +403,52 @@ export const fetchAndSaveLatestJulyCallsToMonday = async () => {
 
     for (const call of julyCalls) {
       let shortSummary = "N/A";
-
+      let csatScore = "0/5";
       if (call.summary) {
+        // Summarize call using emojis
         const messages = [
           {
             role: "system",
             content: `Summarize the following call details concisely using numbered points. Ensure each point is clearly separated for readability in Monday.com by using emojis.
-        
+            
             1️⃣ 
             2️⃣ 
             3️⃣ 
-
+            
             like that
-        
+            
             Use these emojis (1️⃣, 2️⃣, 3️⃣) to ensure separation is visually clear in Monday.com.`,
           },
-          { role: "user", content: call.summary },
         ];
 
         const aiResponse = await completions(messages);
         if (aiResponse.status === 0 && aiResponse.data) {
-          // Convert AI response to HTML
           const plainSummary = aiResponse.data;
           shortSummary = plainSummary
-            .split("\n") // Split by new lines
-            .map((line) => `<strong>${line.trim()}</strong><br>`) // Make each line bold with <br>
-            .join(""); // Join as HTML string
+            .split("\n")
+            .map((line) => `<strong>${line.trim()}</strong><br>`)
+            .join("");
+        }
+
+        const csatMessages = [
+          {
+            role: "system",
+            content:
+              "You are a customer satisfaction evaluator. Based on the following call summary, rate the customer experience from 0 to 5 (5 = excellent, 0 = terrible). Respond with only the number.",
+          },
+          { role: "user", content: call.summary },
+        ];
+
+        const csatResponse = await completions(csatMessages);
+        if (csatResponse.status === 0 && csatResponse.data) {
+          const csatMatch = csatResponse.data.match(/\b[0-5]\b/);
+          if (csatMatch) {
+            csatScore = `${csatMatch[0]}/5`;
+          }
         }
       }
 
+      console.log(typeof csatScore);
       const callData = {
         id: call.id,
         startedAt: call.startedAt,
@@ -405,7 +458,18 @@ export const fetchAndSaveLatestJulyCallsToMonday = async () => {
         startingTime: call.startedAt,
         endingTime: call.endedAt,
         shortSummary: shortSummary,
-        summary: call.summary,
+        summary: call.summary ,
+        csatScore : csatScore,
+        callDate : new Date(call.startedAt).toLocaleString("en-US", {
+          timeZone: "America/New_York",
+          day: "numeric",
+          month: "numeric",
+          year: "numeric",
+          hour: "numeric",
+          minute: "numeric",
+          second: "numeric",
+          hour12: true,
+        })
       };
 
       await createJulyMondayItem(callData);
@@ -490,8 +554,8 @@ export const insertThroughWebhook = async (req, res) => {
     console.log(groupId);
     // Generate short summary
     let shortSummary = "N/A";
-    let csatScore = "N/A";
-    let overallScore = "N/A"
+    let csatScore = "0/5";
+    let overallScore = "0/10"
 
     if (summary) {
       const messages = [
@@ -578,7 +642,8 @@ export const insertThroughWebhook = async (req, res) => {
           text_mkpkcsbe: sanitize(s3RecordingUrl),
           long_text_mkpmq3sq: sanitize(summary || "N/A"),
           long_text_mkpmbyb2: sanitize(shortSummary),
-          text_mkpnxs1n : `${sanitize(overallScore)}/10`
+          text_mkpnxs1n : `${sanitize(overallScore)}/10`,
+          date_mkpp19pr : { date: formatDate(startedAt) }
         }
       : {
           name: sanitize(id),
@@ -588,7 +653,8 @@ export const insertThroughWebhook = async (req, res) => {
           text_mkpkxzyf: sanitize(convertToEST(endedAt)),
           long_text_mkpmxjcp: sanitize(shortSummary),
           long_text_mkpmy75m: sanitize(summary || "N/A"),
-          text_mkpnfqn9 : `${sanitize(csatScore)}/5`
+          text_mkpnfqn9 : `${sanitize(csatScore)}/5`,
+          date_mkppvxrc : { date: formatDate(startedAt) }
         };
 
     // Prepare Monday.com API request
@@ -638,3 +704,4 @@ export const insertThroughWebhook = async (req, res) => {
     });
   }
 };
+
