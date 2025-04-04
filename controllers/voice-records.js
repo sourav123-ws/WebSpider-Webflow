@@ -605,7 +605,7 @@ export const insertThroughWebhook = async (req, res) => {
       const overallScoreMessages = [ 
         {
           role: "system",
-          content: "Analyze the given summary and provide a score from 0 to 10 (10 being best).If there is no summary available give them a score of 0"
+          content: "You are an evaluator. Analyze the provided summary and rate it on a scale of 0 to 10 (10 being the best).Give Response by reading the summary properly Respond only with the number, no explanation. If the summary is empty or not useful, respond with 0."
         },
         { role: "user", content: summary }
       ];
@@ -642,7 +642,7 @@ export const insertThroughWebhook = async (req, res) => {
           text_mkpkcsbe: sanitize(s3RecordingUrl),
           long_text_mkpmq3sq: sanitize(summary || "N/A"),
           long_text_mkpmbyb2: sanitize(shortSummary),
-          text_mkpnxs1n : `${sanitize(overallScore)}/10`,
+          text_mkpnxs1n : `${sanitize(overallScore)}`,
           date_mkpp19pr : { date: formatDate(startedAt) }
         }
       : {
@@ -653,7 +653,7 @@ export const insertThroughWebhook = async (req, res) => {
           text_mkpkxzyf: sanitize(convertToEST(endedAt)),
           long_text_mkpmxjcp: sanitize(shortSummary),
           long_text_mkpmy75m: sanitize(summary || "N/A"),
-          text_mkpnfqn9 : `${sanitize(csatScore)}/5`,
+          text_mkpnfqn9 : `${sanitize(csatScore)}`,
           date_mkppvxrc : { date: formatDate(startedAt) }
         };
 
