@@ -594,9 +594,11 @@ export const insertThroughWebhook = async (req, res) => {
   
       const csatResponse = await completions(csatMessages);
       if (csatResponse.status === 0 && csatResponse.data) {
-        const scoreMatch = csatResponse.data.match(/[1-5]/);
+        const scoreMatch = csatResponse.data.match(/\b[0-5]\b/);
         if (scoreMatch) {
-          csatScore = scoreMatch[0]+"/ 5";
+          csatScore = `${scoreMatch[0]} / 5`; // Ensure formatting is consistent
+        } else {
+          csatScore = "0 / 5"; // Default when no valid score is found
         }
       }
     }
