@@ -7,6 +7,7 @@ import { managerScoreValue, mondayWebhooks } from "./controllers/monday-webhooks
 import { getRecruitmentDetails, webflowWebhooks } from "./controllers/webflow-webhooks.js";
 import cron from "node-cron";
 import { fetchAndSaveLatestCallsToMonday, fetchAndSaveLatestJulyCallsToMonday, insertThroughWebhook } from "./controllers/voice-records.js";
+import { createBookingItem } from "./controllers/tomma.js";
 dotenv.config();
 
 const app = express();
@@ -34,6 +35,7 @@ app.post("/manage-score-value",managerScoreValue);
 app.post("fetch-save-vodafone-calls",fetchAndSaveLatestCallsToMonday);
 app.post("/fetch-save-july-calls",fetchAndSaveLatestJulyCallsToMonday);
 app.post("/insert-through-webhook", insertThroughWebhook)
+app.post("/tomma-booking-webhook",createBookingItem);
 
 app.get("/run-cron", async (req, res) => {
   console.log("🚀 Running cron job...");
