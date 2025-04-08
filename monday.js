@@ -14,6 +14,7 @@ import dotenv from "dotenv";
 import { getTimeOfDay } from "./utils.js";
 dotenv.config();
 import dayjs from "dayjs";
+import { send } from "process";
 
 const MONDAY_API_KEY = process.env.MONDAY_API_KEY;
 const BOARD_ID = 1944965797;

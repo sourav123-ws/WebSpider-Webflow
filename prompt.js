@@ -94,7 +94,7 @@ export const generatePromptDateWise = async () => {
           lead.campaignName === "N/A" ? "Others" : lead.campaignName,
         campaignId:
           lead.campaignId === "N/A"
-            ? "Referral,Website,Calendly"
+            ? "Referral,Website,Calendly,Events"
             : lead.campaignId,
         leadName: lead.fullName || "N/A",
         status: lead.status || "N/A",
