@@ -1,5 +1,4 @@
 import fs from "fs";
-import nodemailer from "nodemailer";
 import {
   generatePromptDateWise,
   generatePrompt,
@@ -7,14 +6,11 @@ import {
   getCurrentDate,
   aiGenerateData,
 } from "./prompt.js";
-import { completions } from "./openai.js";
 import { sendMail } from "./utils.js";
 import axios from "axios";
 import dotenv from "dotenv";
-import { getTimeOfDay } from "./utils.js";
 dotenv.config();
 import dayjs from "dayjs";
-import { send } from "process";
 
 const MONDAY_API_KEY = process.env.MONDAY_API_KEY;
 const BOARD_ID = 1944965797;
